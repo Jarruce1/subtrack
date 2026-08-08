@@ -34,11 +34,11 @@ People with 5–30 subscriptions have charges scattered across statements and in
 | F-01 | private-subscription-store  | (foundation) per-user subscription storage with enforced account isolation         | —             | FR-004, Access Control, NFR (privacy)                       | done |
 | S-01 | first-subscription-dashboard | register, add first subscription, see dashboard with normalized cost + next renewal | F-01          | US-01, FR-001, FR-002, FR-003, FR-004, FR-009, FR-010, FR-011 | done |
 | S-02 | renewal-edgecase-correctness | trust renewal dates across month-end and leap-year cases                           | S-01          | US-02, FR-010, NFR (correctness)                            | done |
-| S-03 | manage-subscription-list    | view all subscriptions with status, edit any field, delete an entry                | S-01          | FR-005, FR-006, FR-007                                      | in-progress |
-| S-04 | status-lifecycle-totals     | pause/cancel/reactivate and see totals + renewals reflect only active items        | S-03          | US-04, FR-008                                               | ready |
-| S-05 | upcoming-renewals-list      | see renewals due in the next 30 days, soonest first                                | S-01          | FR-013                                                      | in-progress |
-| S-06 | category-cost-breakdown     | see cost totals broken down per category                                           | S-01          | FR-012                                                      | proposed |
-| S-07 | duplicate-name-warning      | get a non-blocking duplicate warning on add or rename, and save anyway             | S-01, S-03    | US-03, FR-014                                               | proposed |
+| S-03 | manage-subscription-list    | view all subscriptions with status, edit any field, delete an entry                | S-01          | FR-005, FR-006, FR-007                                      | done |
+| S-04 | status-lifecycle-totals     | pause/cancel/reactivate and see totals + renewals reflect only active items        | S-03          | US-04, FR-008                                               | done |
+| S-05 | upcoming-renewals-list      | see renewals due in the next 30 days, soonest first                                | S-01          | FR-013                                                      | done |
+| S-06 | category-cost-breakdown     | see cost totals broken down per category                                           | S-01          | FR-012                                                      | ready |
+| S-07 | duplicate-name-warning      | get a non-blocking duplicate warning on add or rename, and save anyway             | S-01, S-03    | US-03, FR-014                                               | ready |
 
 ## Streams
 
@@ -115,7 +115,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Editing a start date or cycle must re-derive renewal dates from the new anchor; sequenced right after S-01 so the list surface exists before status- and duplicate-work builds on it.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-04: Status lifecycle drives totals
 
@@ -127,7 +127,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The active-only aggregation rule cuts across dashboard, category, and renewals views; landing it after S-03 keeps the change surface to the status control plus the shared aggregation rule.
-- **Status:** proposed
+- **Status:** ready
 
 ### S-05: Upcoming renewals list
 
@@ -139,7 +139,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Pure read-only derivation over data S-01 already computes; low risk, high habit value — a natural parallel-agent slice.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-06: Per-category cost breakdown
 
@@ -151,7 +151,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Cheap once normalization exists (the PRD's own argument for keeping it); the only care point is reusing the exact same aggregation rule as the overall totals so the two never disagree.
-- **Status:** proposed
+- **Status:** ready
 
 ### S-07: Duplicate warning on add and rename
 
@@ -163,7 +163,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The cheapest business rule, but it guards the totals against double-tracked costs; must warn, never block — blocking would break the two-legitimate-accounts case.
-- **Status:** proposed
+- **Status:** ready
 
 ## Backlog Handoff
 
