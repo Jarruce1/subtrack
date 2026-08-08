@@ -327,24 +327,24 @@ revert the three commits.
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Type check passes: `npx astro check`
-- [x] 2.3 Unit tests pass: `npm test`
-- [x] 2.4 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint` — 2acff1d
+- [x] 2.2 Type check passes: `npx astro check` — 2acff1d
+- [x] 2.3 Unit tests pass: `npm test` — 2acff1d
+- [x] 2.4 Build passes: `npm run build` — 2acff1d
 
 #### Manual
 
-- [ ] 2.5 Authenticated curl checks: exact dup, normalized dup, no match, exclude self, 401
+- [x] 2.5 Authenticated curl checks: exact dup, normalized dup, no match, exclude self, 401
 
 ### Phase 3: Form warning flow (add + rename)
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Type check passes: `npx astro check`
-- [ ] 3.3 Unit tests pass: `npm test`
-- [ ] 3.4 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Type check passes: `npx astro check`
+- [x] 3.3 Unit tests pass: `npm test`
+- [x] 3.4 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.5 Smoke: add dup warns, save-anyway persists, rename dup warns, no-match silent, no self-match
+- [x] 3.5 Smoke: add dup warns, save-anyway persists, rename dup warns, no-match silent, no self-match
