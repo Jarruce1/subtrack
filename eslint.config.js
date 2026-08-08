@@ -59,6 +59,24 @@ const reactConfig = tseslint.config({
   },
 });
 
+// Node CLI scripts (scripts/*.mjs): plain JS run by node, not part of the
+// app's TS project — type-aware rules produce false `any` errors there, and
+// console IS the interface.
+const scriptsConfig = tseslint.config({
+  files: ["scripts/**/*.mjs"],
+  extends: [tseslint.configs.disableTypeChecked],
+  languageOptions: {
+    globals: {
+      console: true,
+      process: true,
+      Buffer: true,
+    },
+  },
+  rules: {
+    "no-console": "off",
+  },
+});
+
 const astroConfig = tseslint.config({
   files: ["**/*.astro"],
   rules: {
@@ -75,5 +93,6 @@ export default tseslint.config(
   eslintPluginAstro.configs["flat/recommended"],
   ...eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
+  scriptsConfig,
   eslintPluginPrettier,
 );

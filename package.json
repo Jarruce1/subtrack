@@ -13,6 +13,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
     "test:watch": "vitest",
+    "scan:secrets": "npm run build && node scripts/scan-secrets.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {
