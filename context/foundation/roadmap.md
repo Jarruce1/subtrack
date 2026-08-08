@@ -38,7 +38,7 @@ People with 5–30 subscriptions have charges scattered across statements and in
 | S-04 | status-lifecycle-totals     | pause/cancel/reactivate and see totals + renewals reflect only active items        | S-03          | US-04, FR-008                                               | ready |
 | S-05 | upcoming-renewals-list      | see renewals due in the next 30 days, soonest first                                | S-01          | FR-013                                                      | done |
 | S-06 | category-cost-breakdown     | see cost totals broken down per category                                           | S-01          | FR-012                                                      | done |
-| S-07 | duplicate-name-warning      | get a non-blocking duplicate warning on add or rename, and save anyway             | S-01, S-03    | US-03, FR-014                                               | in-progress |
+| S-07 | duplicate-name-warning      | get a non-blocking duplicate warning on add or rename, and save anyway             | S-01, S-03    | US-03, FR-014                                               | done |
 
 ## Streams
 
@@ -151,7 +151,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Cheap once normalization exists (the PRD's own argument for keeping it); the only care point is reusing the exact same aggregation rule as the overall totals so the two never disagree.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-07: Duplicate warning on add and rename
 
@@ -163,7 +163,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The cheapest business rule, but it guards the totals against double-tracked costs; must warn, never block — blocking would break the two-legitimate-accounts case.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
