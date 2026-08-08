@@ -18,6 +18,11 @@ const subscriptions: Subscription[] = supabase ? await listSubscriptions(supabas
 // Server's UTC date; Workers run UTC (accepted MVP limitation — see billing.ts).
 const today = new Date().toISOString().slice(0, 10);
 
+// Failure notice from form-post routes (currently the sign-out fix): the
+// sibling of the signin/signup ?error= contract. Astro's default escaping
+// keeps a crafted ?error= value inert.
+const errorMessage = Astro.url.searchParams.get("error");
+
 const totals = summarizeActive(subscriptions);
 const categoryTotals = summarizeByCategory(subscriptions);
 // Display grouping only. Relies on summarizeByCategory's sorted-output
@@ -55,6 +60,11 @@ const rows = subscriptions.map((subscription) => ({
         <p class="text-center text-blue-100/80">Supabase is not configured.</p>
       ) : (
         <div class="mx-auto w-full max-w-3xl space-y-6">
+          {errorMessage && (
+            <p role="alert" class="rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300">
+              {errorMessage}
+            </p>
+          )}
           <header class="flex flex-wrap items-center justify-between gap-3">
             <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
               Dashboard
