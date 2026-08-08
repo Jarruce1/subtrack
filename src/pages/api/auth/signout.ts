@@ -12,9 +12,10 @@ export const POST: APIRoute = async (context) => {
       // A failed signOut leaves the session cookie alive (supabase-js returns
       // early without clearing it on network/5xx logout failures), so
       // redirecting to "/" would fake a signed-out state. Surface the failure
-      // where the sign-out button lives. Fixed generic message on purpose —
-      // auth error detail never belongs in a URL (test-plan risk #6).
-      return context.redirect(`/dashboard?error=${encodeURIComponent("Sign out failed. Please try again.")}`);
+      // where the sign-out button lives. Short fixed code on purpose — auth
+      // error detail never belongs in a URL (test-plan risk #6); the dashboard
+      // maps it to its message via auth-errors.ts.
+      return context.redirect("/dashboard?error=signout-failed");
     }
   }
   return context.redirect("/");

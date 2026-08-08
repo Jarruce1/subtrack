@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { authErrorMessage } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase";
 import { listSubscriptions } from "@/lib/services/subscriptions";
 import { nextRenewalDate, normalizeCost, summarizeActive, summarizeByCategory, upcomingRenewals } from "@/lib/billing";
@@ -18,10 +19,12 @@ const subscriptions: Subscription[] = supabase ? await listSubscriptions(supabas
 // Server's UTC date; Workers run UTC (accepted MVP limitation — see billing.ts).
 const today = new Date().toISOString().slice(0, 10);
 
-// Failure notice from form-post routes (currently the sign-out fix): the
-// sibling of the signin/signup ?error= contract. Astro's default escaping
-// keeps a crafted ?error= value inert.
-const errorMessage = Astro.url.searchParams.get("error");
+// Failure notice from form-post routes (currently the sign-out fix): ?error=
+// carries a short code mapped to a fixed message here (auth-errors.ts) —
+// unknown codes collapse to the generic message, so a crafted link cannot put
+// chosen text inside this trusted page (content spoofing), and Astro's
+// default escaping keeps the value inert either way.
+const errorMessage = authErrorMessage(Astro.url.searchParams.get("error"));
 
 const totals = summarizeActive(subscriptions);
 const categoryTotals = summarizeByCategory(subscriptions);

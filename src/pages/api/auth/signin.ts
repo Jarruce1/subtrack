@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import type { AuthErrorCode } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase";
 
 export const POST: APIRoute = async (context) => {
@@ -8,12 +9,17 @@ export const POST: APIRoute = async (context) => {
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
+    return context.redirect("/auth/signin?error=not-configured");
   }
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
+    // Short code only — backend error detail never belongs in a URL
+    // (test-plan risk #6). /auth/signin maps codes to fixed messages via
+    // auth-errors.ts, so a wrong password still reads clearly.
+    const code: AuthErrorCode =
+      error.code === "invalid_credentials" ? "invalid-credentials" : error.status === 429 ? "rate-limited" : "unknown";
+    return context.redirect(`/auth/signin?error=${code}`);
   }
 
   return context.redirect("/dashboard");

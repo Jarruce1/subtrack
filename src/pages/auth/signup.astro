@@ -1,8 +1,10 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import SignUpForm from "@/components/auth/SignUpForm";
+import { authErrorMessage } from "@/lib/auth-errors";
 
-const error = Astro.url.searchParams.get("error");
+// ?error= carries a short code (see auth-errors.ts) — never free text.
+const error = authErrorMessage(Astro.url.searchParams.get("error"));
 ---
 
 <Layout title="Sign up">

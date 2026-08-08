@@ -4,7 +4,9 @@ import { createClient, type TypedSupabaseClient } from "@/lib/supabase";
 import { POST as createSubscriptionRoute } from "@/pages/api/subscriptions/index";
 import { DELETE as deleteSubscriptionRoute, PATCH as updateSubscriptionRoute } from "@/pages/api/subscriptions/[id]";
 import { GET as duplicateCheckRoute } from "@/pages/api/subscriptions/duplicate-check";
+import { POST as signInRoute } from "@/pages/api/auth/signin";
 import { POST as signOutRoute } from "@/pages/api/auth/signout";
+import { POST as signUpRoute } from "@/pages/api/auth/signup";
 
 // Route-level error contracts under INDUCED failures (test-plan §2 risk #3,
 // §3 Phase 3): a forced backend failure must yield a non-2xx response with a
@@ -65,6 +67,21 @@ function authClient(result: { error: { message: string } | null }): TypedSupabas
   return { auth: { signOut: () => Promise.resolve(result) } } as unknown as TypedSupabaseClient;
 }
 
+/** supabase-js AuthError essentials for the signin/signup mapping. */
+interface InducedAuthError {
+  message: string;
+  code?: string;
+  status?: number;
+}
+
+function signInClient(error: InducedAuthError | null): TypedSupabaseClient {
+  return { auth: { signInWithPassword: () => Promise.resolve({ error }) } } as unknown as TypedSupabaseClient;
+}
+
+function signUpClient(error: InducedAuthError | null): TypedSupabaseClient {
+  return { auth: { signUp: () => Promise.resolve({ error }) } } as unknown as TypedSupabaseClient;
+}
+
 const TEST_USER = { id: "8f7f0f7e-0000-4000-8000-000000000001" };
 const VALID_ID = "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed";
 
@@ -108,6 +125,23 @@ function apiContext(init: ContextInit = {}): APIContext {
 async function readJson(response: Response): Promise<Record<string, unknown>> {
   return (await response.json()) as Record<string, unknown>;
 }
+
+/** Form-encoded POST context — the shape a browser form submit produces. */
+function formPostContext(path: string, fields: Record<string, string>): APIContext {
+  const url = new URL(path, "http://localhost:4321");
+  const request = new Request(url, { method: "POST", body: new URLSearchParams(fields) });
+  const context = {
+    request,
+    url,
+    params: {},
+    locals: { user: null },
+    cookies: {},
+    redirect: (target: string, status = 302) => new Response(null, { status, headers: { Location: target } }),
+  };
+  return context as unknown as APIContext;
+}
+
+const SIGNIN_FIELDS = { email: "probe@example.com", password: "wrong-password" };
 
 beforeEach(() => {
   createClientMock.mockReset();
@@ -210,11 +244,13 @@ describe("POST /api/auth/signout error contract", () => {
     expect(location).toContain("error=");
   });
 
-  it("carries a fixed generic message in the failure redirect, never backend detail", async () => {
+  it("carries the fixed signout-failed code in the failure redirect, never backend detail", async () => {
     createClientMock.mockReturnValue(authClient({ error: { message: INDUCED_MESSAGE } }));
     const response = await signOutRoute(apiContext({ path: "/api/auth/signout" }));
     const location = response.headers.get("Location") ?? "";
-    expect(location).toBe(`/dashboard?error=${encodeURIComponent("Sign out failed. Please try again.")}`);
+    // Short code, mapped to its message by the dashboard (auth-errors.ts) —
+    // free text in ?error= would be a content-spoofing surface (risk #6).
+    expect(location).toBe("/dashboard?error=signout-failed");
   });
 
   it("still redirects to the landing page on success", async () => {
@@ -222,5 +258,63 @@ describe("POST /api/auth/signout error contract", () => {
     const response = await signOutRoute(apiContext({ path: "/api/auth/signout" }));
     expect(response.status).toBe(302);
     expect(response.headers.get("Location")).toBe("/");
+  });
+});
+
+// signin/signup redirect with SHORT CODES, never error.message — the
+// error-path-hardening follow-up closing the last raw-detail-in-URL path
+// (risk #6). The auth pages map codes to fixed messages via auth-errors.ts,
+// so a wrong password still reads clearly in the UI.
+describe("POST /api/auth/signin error contract", () => {
+  it("maps invalid credentials to the invalid-credentials code, never backend detail", async () => {
+    createClientMock.mockReturnValue(
+      signInClient({ message: INDUCED_MESSAGE, code: "invalid_credentials", status: 400 }),
+    );
+    const response = await signInRoute(formPostContext("/api/auth/signin", SIGNIN_FIELDS));
+    const location = response.headers.get("Location") ?? "";
+    expect(location).toBe("/auth/signin?error=invalid-credentials");
+    expect(location).not.toContain("induced");
+  });
+
+  it("collapses any other failure to the unknown code", async () => {
+    createClientMock.mockReturnValue(
+      signInClient({ message: INDUCED_MESSAGE, code: "unexpected_failure", status: 500 }),
+    );
+    const response = await signInRoute(formPostContext("/api/auth/signin", SIGNIN_FIELDS));
+    expect(response.headers.get("Location")).toBe("/auth/signin?error=unknown");
+  });
+
+  it("still redirects to the dashboard on success", async () => {
+    createClientMock.mockReturnValue(signInClient(null));
+    const response = await signInRoute(formPostContext("/api/auth/signin", SIGNIN_FIELDS));
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe("/dashboard");
+  });
+});
+
+describe("POST /api/auth/signup error contract", () => {
+  it("maps an already-registered email to the email-taken code, never backend detail", async () => {
+    createClientMock.mockReturnValue(
+      signUpClient({ message: INDUCED_MESSAGE, code: "user_already_exists", status: 422 }),
+    );
+    const response = await signUpRoute(formPostContext("/api/auth/signup", SIGNIN_FIELDS));
+    const location = response.headers.get("Location") ?? "";
+    expect(location).toBe("/auth/signup?error=email-taken");
+    expect(location).not.toContain("induced");
+  });
+
+  it("collapses any other failure to the unknown code", async () => {
+    createClientMock.mockReturnValue(
+      signUpClient({ message: INDUCED_MESSAGE, code: "unexpected_failure", status: 500 }),
+    );
+    const response = await signUpRoute(formPostContext("/api/auth/signup", SIGNIN_FIELDS));
+    expect(response.headers.get("Location")).toBe("/auth/signup?error=unknown");
+  });
+
+  it("still redirects to confirm-email on success", async () => {
+    createClientMock.mockReturnValue(signUpClient(null));
+    const response = await signUpRoute(formPostContext("/api/auth/signup", SIGNIN_FIELDS));
+    expect(response.status).toBe(302);
+    expect(response.headers.get("Location")).toBe("/auth/confirm-email");
   });
 });
