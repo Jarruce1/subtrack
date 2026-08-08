@@ -318,19 +318,19 @@ revert the three commits.
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Type check passes: `npx astro check`
-- [x] 1.3 Unit tests pass (incl. new `duplicates.test.ts`): `npm test`
-- [x] 1.4 Build passes: `npm run build`
+- [x] 1.1 Lint passes: `npm run lint` — e4484d2
+- [x] 1.2 Type check passes: `npx astro check` — e4484d2
+- [x] 1.3 Unit tests pass (incl. new `duplicates.test.ts`): `npm test` — e4484d2
+- [x] 1.4 Build passes: `npm run build` — e4484d2
 
 ### Phase 2: Lean name reader + duplicate-check endpoint
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Type check passes: `npx astro check`
-- [ ] 2.3 Unit tests pass: `npm test`
-- [ ] 2.4 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Type check passes: `npx astro check`
+- [x] 2.3 Unit tests pass: `npm test`
+- [x] 2.4 Build passes: `npm run build`
 
 #### Manual
 
