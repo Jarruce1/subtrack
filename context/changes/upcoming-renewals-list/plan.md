@@ -182,25 +182,25 @@ None — no schema, API, or data changes.
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `npm test`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 Types check: `npx astro check`
-- [x] 1.4 Build passes: `npm run build`
+- [x] 1.1 Unit tests pass: `npm test` — 05f9e8c
+- [x] 1.2 Lint passes: `npm run lint` — 05f9e8c
+- [x] 1.3 Types check: `npx astro check` — 05f9e8c
+- [x] 1.4 Build passes: `npm run build` — 05f9e8c
 
 ### Phase 2: Dashboard "Upcoming renewals" section
 
 #### Automated
 
-- [ ] 2.1 Unit tests still pass: `npm test`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Types check: `npx astro check`
-- [ ] 2.4 Build passes: `npm run build`
+- [x] 2.1 Unit tests still pass: `npm test`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Types check: `npx astro check`
+- [x] 2.4 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.5 Smoke against local stack: seeded subscriptions land in the section soonest-first with name, amount + currency, and date
-- [ ] 2.6 Boundary cases verified in the rendered page: renewal today shown; renewal exactly today + 30 shown; renewal today + 31 absent
-- [ ] 2.7 Paused and cancelled subscriptions absent from the section (still listed under Subscriptions)
-- [ ] 2.8 Same-day renewals render in stable (insertion) order
-- [ ] 2.9 User whose subscriptions all renew beyond the window sees "No renewals in the next 30 days."
-- [ ] 2.10 User with zero subscriptions still gets the original global empty state (no Upcoming section)
+- [x] 2.5 Smoke against local stack: seeded subscriptions land in the section soonest-first with name, amount + currency, and date _(performed 2026-08-08, dev server :4402 against local Supabase — `.env`/`.dev.vars` temporarily swapped to the local stack and restored after; users `s05-window-*`/`s05-emptywin-*`/`s05-nosubs-*`; 5 rows rendered soonest-first, section order totals → upcoming → subscriptions)_
+- [x] 2.6 Boundary cases verified in the rendered page: renewal today shown; renewal exactly today + 30 shown; renewal today + 31 absent _(2026-08-08 shown, 2026-09-07 shown, 2026-09-08 absent)_
+- [x] 2.7 Paused and cancelled subscriptions absent from the section (still listed under Subscriptions) _(both absent from Upcoming, both present once elsewhere in page)_
+- [x] 2.8 Same-day renewals render in stable (insertion) order _(2026-08-20 pair kept the page's created_at-desc input order — stable sort confirmed)_
+- [x] 2.9 User whose subscriptions all renew beyond the window sees "No renewals in the next 30 days." _(quiet line rendered, 0 rows)_
+- [x] 2.10 User with zero subscriptions still gets the original global empty state (no Upcoming section) _("No subscriptions yet" present, `upcoming-heading` absent)_
