@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase";
 
 export const POST: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
+  // Null client = env not configured: nothing to sign out OF — middleware
+  // cannot validate any session either, so the cookie is inert and the "/"
+  // redirect below is honest (Layout's env banner owns the messaging).
   if (supabase) {
     const { error } = await supabase.auth.signOut();
     if (error) {

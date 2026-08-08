@@ -113,7 +113,15 @@ const files = walk(clientDir);
 const findings = [];
 
 for (const file of files) {
-  const content = readFileSync(file).toString("utf8");
+  // Fail-closed: a file the scanner cannot read must fail the scan (exit 2),
+  // not crash past it — an unscanned file is an unverified file.
+  let content;
+  try {
+    content = readFileSync(file).toString("utf8");
+  } catch {
+    findings.push({ file: relative(projectRoot, file), needle: "unreadable file (fail-closed)" });
+    continue;
+  }
   for (const { name, value } of secretValues) {
     if (content.includes(value)) {
       findings.push({ file: relative(projectRoot, file), needle: name });
