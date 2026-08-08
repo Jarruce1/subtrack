@@ -361,17 +361,17 @@ Full US-01 flow against `npm run dev` + local Supabase, fresh user:
 
 #### Automated
 
-- [x] 1.1 `npm run lint` passes (module compiles under `strictTypeChecked`)
-- [x] 1.2 `npm run build` passes without a running database
+- [x] 1.1 `npm run lint` passes (module compiles under `strictTypeChecked`) — 8bc513c
+- [x] 1.2 `npm run build` passes without a running database — 8bc513c
 
 #### Manual
 
-- [x] 1.3 US-01 example: 43 monthly → 43 / 516; 2026-07-15 → next 2026-08-15
-- [x] 1.4 Weekly and custom-N normalization match Business Logic §1
-- [x] 1.5 US-02 clamping: 2026-01-31 anchor → Feb 28, then Mar 31
-- [x] 1.6 Leap year: 2024-02-29 anchor → 2027-02-28, 2028-02-29
-- [x] 1.7 Boundaries: today == occurrence; future start date returns start date
-- [x] 1.8 `summarizeActive`: non-active excluded; currencies never merged
+- [x] 1.3 US-01 example: 43 monthly → 43 / 516; 2026-07-15 → next 2026-08-15 — 8bc513c
+- [x] 1.4 Weekly and custom-N normalization match Business Logic §1 — 8bc513c
+- [x] 1.5 US-02 clamping: 2026-01-31 anchor → Feb 28, then Mar 31 — 8bc513c
+- [x] 1.6 Leap year: 2024-02-29 anchor → 2027-02-28, 2028-02-29 — 8bc513c
+- [x] 1.7 Boundaries: today == occurrence; future start date returns start date — 8bc513c
+- [x] 1.8 `summarizeActive`: non-active excluded; currencies never merged — 8bc513c
 
 > Phase 1 verification notes (run autonomously): 1.1/1.2 — lint exit 0, build exit 0, plus `npx astro check` 0 errors. 1.3–1.8 — 20-assertion scratch script (`npx tsx`, not committed) over the PRD worked examples, all pass: 43 monthly → {43, 516}, start 2026-07-15 + today 2026-08-08 → 2026-08-15; weekly 12 → {52, 624}, custom-3 30 → {10, 120}; anchor 2026-01-31 → 2026-02-28 (today 2026-02-10) then 2026-03-31 (today 2026-03-01, anchor preserved); yearly anchor 2024-02-29 → 2027-02-28 then 2028-02-29; today == occurrence returns that date (monthly and weekly), future start returns itself, today == start returns start; custom-3 anchored clamping (2026-01-31 → 2026-04-30 → 2026-07-31); `summarizeActive` excludes paused/cancelled, keeps PLN/EUR as separate sorted rows, sums unrounded, `[]` on empty; `custom` with null interval throws (defensive).
 
@@ -379,16 +379,18 @@ Full US-01 flow against `npm run dev` + local Supabase, fresh user:
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes (schema↔`CreateSubscriptionInput` compile check active)
-- [ ] 2.2 `npm run build` passes without a running database
+- [x] 2.1 `npm run lint` passes (schema↔`CreateSubscriptionInput` compile check active)
+- [x] 2.2 `npm run build` passes without a running database
 
 #### Manual
 
-- [ ] 2.3 No cookie → 401
-- [ ] 2.4 Valid US-01 payload → 201, row visible for that user
-- [ ] 2.5 Field errors per-field for amount/currency/date/category violations
-- [ ] 2.6 Cycle pair: custom without N → 400; monthly with stale N → 201, interval stored null
-- [ ] 2.7 `status` omitted → 201 with `active`
+- [x] 2.3 No cookie → 401
+- [x] 2.4 Valid US-01 payload → 201, row visible for that user
+- [x] 2.5 Field errors per-field for amount/currency/date/category violations
+- [x] 2.6 Cycle pair: custom without N → 400; monthly with stale N → 201, interval stored null
+- [x] 2.7 `status` omitted → 201 with `active`
+
+> Phase 2 verification notes (run autonomously): zod 4.4.3 installed; `.flatten()` avoided per plan — the endpoint uses `z.flattenError(...)`; `.finite()` dropped (deprecated no-op in v4 — `z.number()` already rejects NaN/±Infinity). 2.1/2.2 — lint exit 0 (both `AssertAssignable` compile guards active, create and update), build exit 0. 2.3–2.7 — curl against `npm run dev` (port 4322; 4321 was taken) + local stack with `.env`/`.dev.vars` temporarily pointed at it (restored after the phase; note: Astro's CSRF `checkOrigin` requires an `Origin` header matching the host on POSTs, including JSON ones — curl calls send `Origin: http://localhost:4322`): no cookie → `401 {"error":"Authentication required"}`; fresh user s01a@test.local (signup → autoconfirm → signin cookie jar) + US-01 Netflix payload → 201 with the row JSON, and psql shows the row owned by that user; negative amount / 3-decimal amount / `zł` currency / 2026-02-30 / `Gaming` category → five 400s each naming exactly the offending field in `errors.fieldErrors`; `custom` without N → 400 on `billing_interval_months`; `monthly` with stale N=3 → 201 with `billing_interval_months: null` (DB confirms null); status omitted → 201 with `status: "active"`. F2 guard spot-checked via tsx scratch: `{}` rejected ("Provide at least one field to update"), cycle-without-interval and inconsistent pairs rejected, name-only and consistent pairs accepted.
 
 ### Phase 3: Add form and live dashboard
 
