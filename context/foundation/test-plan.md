@@ -81,7 +81,7 @@ orchestrator updates Status as artifacts appear on disk.
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|------------|-----------------|----------------|------------|--------|----------------|
 | 1 | API & RLS integration | Prove two-account isolation and honest API error/validation contracts on a real local database | #2, #5 (#3 → Phase 3) | integration (local Supabase), SQL ACL assertions | done | `context/changes/testing-api-rls-integration/` |
-| 2 | E2E critical flow | Prove signup → add → dashboard works in a real browser and shows hand-verifiable numbers | #4, #1 | e2e (Playwright) | not started | — |
+| 2 | E2E critical flow | Prove signup → add → dashboard works in a real browser and shows hand-verifiable numbers | #4, #1 | e2e (Playwright) | done | `context/changes/e2e-critical-flow/` |
 | 3 | Error-path & secret hardening | Pin the swallowed-error fix with failing-first tests and make secret leakage mechanically checkable | #3, #6 | integration (induced failures), build-output scan | not started | — |
 | 4 | Quality-gates wiring | Lock the floor: e2e in CI, secret scan in CI, post-deploy smoke checklist | cross-cutting, #7 | gates, manual smoke script | not started | — |
 
@@ -98,7 +98,7 @@ combined risk and cheaper to test than browser flows.
 | unit + property | Vitest + fast-check | 4.1 / 4.9 | Exists: ~71 tests; `vitest run` only (bare `vitest` hangs in watch mode); `AI_AGENT=1` forces the agent reporter |
 | validation schemas | zod | 4.4 | Schemas already unit-tested; Phase 1 extends with abuse payloads |
 | integration (DB/API) | supabase CLI + Docker (local stack) | 2.23 | none yet — see Phase 1; real Postgres + RLS, two seeded users via local auth API (pattern proven manually in the F-01 archive) |
-| e2e | Playwright | n/a | none yet — see Phase 2; generation governed by the `/10x-e2e` skill (CLAUDE.md): role-based locators, no `waitForTimeout`, independent tests with unique ids |
+| e2e | Playwright (Chromium) | 1.62 | Exists: 4 tests + auth setup in `e2e/` (`npm run test:e2e`, local stack required — see §6.3); generation governed by the `/10x-e2e` skill (CLAUDE.md): role-based locators, no `waitForTimeout`, independent tests with unique ids, `seed.spec.ts` exemplar |
 | secret scan | deterministic grep over build output | n/a | none yet — see Phase 3; no AI needed for an exact-string check |
 | (optional) AI-native | `/10x-e2e` review loop; vision caps only for visual-only risks — checked: 2026-08-08 | n/a | DOM snapshot is the default; do not use vision where a deterministic assertion exists |
 
@@ -191,10 +191,44 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.3 Adding an e2e test
 
-- TBD — see §3 Phase 2 for the signup → add → dashboard pattern.
-  Hard rules already fixed by CLAUDE.md `/10x-e2e`: role/label/text
-  locators, no `waitForTimeout`, independent tests with unique-id data
-  and cleanup.
+- **Location**: `e2e/<scenario>.spec.ts` — one scenario per file, name
+  bound to the test-plan risk it protects. Run: `npm run test:e2e`
+  (all) or `npx playwright test <name>` (one spec). Requires the local
+  Supabase stack (`npx supabase start` first) — global setup fails fast
+  with a diagnostic when it's down. NOT in CI (wiring = §3 Phase 4).
+- **Pattern**: model every new test on `e2e/seed.spec.ts` — role/label
+  locators, one setup → action → assert → cleanup cycle per test, state
+  waits only (`waitForURL` / `toBeVisible` / `toHaveCount`), unique
+  `Date.now()` ids. The hard rules live in CLAUDE.md (`/10x-e2e`).
+- **Auth (storageState)**: the `setup` project (`e2e/auth.setup.ts`)
+  signs up one fresh `e2e-*` user per run through the real UI and saves
+  `playwright/.auth/user.json`; the `chromium` project consumes it via
+  `storageState` — tests never log in through the UI. Tests asserting
+  EXACT per-user sums create a private user instead: API signup with an
+  `origin` header (Astro CSRF `checkOrigin` 403s form posts without
+  one), or UI signup only when signup itself is the flow under test.
+- **Env & server**: `.dev.vars`/`.env` point at the CLOUD project, and
+  the Cloudflare adapter reads `.dev.vars` over process env — so
+  `e2e/support/global-setup.ts` swaps both files to local-stack values,
+  boots `astro dev --port 4406` itself (Playwright starts a `webServer:`
+  block BEFORE globalSetup, which would boot it with cloud env), and
+  `global-teardown.ts` kills the server and restores the files
+  byte-identically. A hard-killed run leaves `*.e2e-backup` files —
+  restore manually; backups are never overwritten.
+- **Data policy**: users are `e2e-`-prefixed and stay in local auth
+  (`npx supabase db reset` clears them); subscription rows are cleaned
+  per test (`afterEach` via the API, or the UI delete when deletion is
+  part of the flow). Unique ids make crash leftovers collision-free.
+- **Oracle rule**: expected values are hand-derived from PRD Business
+  Logic §1–§4 as in-test constants/helpers with the derivation in a
+  comment — never imported from `src/lib/billing.ts`.
+- **Trust check**: the suite demonstrably fails when protected behavior
+  is inverted (see the change folder's Progress: `normalizeCost` ×2 →
+  north-star red; paused included in `summarizeActive` → cross-view
+  red). Re-run that break gate when touching billing/aggregation.
+- **Gotcha**: React islands hydrate after load — call
+  `waitForIslands(page)` (`e2e/support/hydration.ts`) before filling
+  forms or clicking island buttons, or controlled inputs lose the fill.
 
 ### 6.4 Adding a test for a new API endpoint
 
@@ -212,6 +246,15 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 (Filled by each phase's final sub-phase with anything surprising the
 phase taught.)
+
+- **Phase 2 (`e2e-critical-flow`)**: Playwright 1.62 starts `webServer:`
+  BEFORE `globalSetup` (verified in the runner source) — an env-file swap
+  must own the dev-server lifecycle inside globalSetup itself. Astro's
+  CSRF `checkOrigin` 403s form-encoded API posts without an `Origin`
+  header. Pre-hydration form fills are silently lost by controlled React
+  inputs (wait for `astro-island[ssr]` to detach). Playwright text
+  assertions normalize the NBSP `Intl.NumberFormat` emits, so
+  `PLN 43.00` with a plain space matches.
 
 ## 7. What We Deliberately Don't Test
 

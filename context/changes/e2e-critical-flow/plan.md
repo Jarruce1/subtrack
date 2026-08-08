@@ -368,12 +368,24 @@ run is killed hard, restore manually from `*.e2e-backup`.
          failure); seed/north-star clean via the UI delete they also
          exercise; unique per-test users make any crash leftovers
          collision-free; `e2e-` prefix marks users for db reset.
+      — all three rows: e439759
 
 ### Phase 4: Verification gates + docs
 
 #### Automated
-- [ ] 4.1 suite 2× green; all gates clean; docs updated (test-plan §3/§6,
-      AGENTS.md)
+- [x] 4.1 suite 2× green back-to-back (5 passed / 5 passed; env-file
+      checksums identical after each run); unit 99 green; lint 0
+      problems; astro check 0/0; build clean; docs updated (test-plan
+      §3 Phase 2 → done, §4 e2e row, §6.3 cookbook, §6.5 phase note;
+      AGENTS.md "How we test" E2E bullet)
 #### Manual
-- [ ] 4.2 deliberate-break gate: right test red per break, reverted,
-      git diff empty, green again
+- [x] 4.2 **Deliberate-break gate (2026-08-09)** — production behavior
+      inverted transiently, never committed:
+      (a) `normalizeCost` monthly → `amount * 2`: north-star AND
+      cross-view red (both assert monthly totals), seed + gating green
+      — the arithmetic is protected;
+      (b) paused exclusion removed from `summarizeActive`: ONLY
+      cross-view red (PLN total 100 ≠ 40) — the aggregation rule is
+      protected by exactly the test that owns it.
+      Both reverts verified: `git diff -- src/` empty, suite 5/5 green
+      again.

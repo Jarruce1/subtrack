@@ -1,7 +1,7 @@
 ---
 change_id: e2e-critical-flow
 title: Playwright E2E suite for the north-star flow and cross-view total consistency
-status: implementing
+status: implemented
 created: 2026-08-09
 updated: 2026-08-09
 archived_at: null
