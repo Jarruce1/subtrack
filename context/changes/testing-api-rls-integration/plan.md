@@ -294,26 +294,37 @@ the Phase 5 manual gate.
 ### Phase 1: Integration test infrastructure
 
 #### Automated
-- [ ] config split, script, helpers, preflight; all gates green
+- [x] config split, script, helpers, preflight; all gates green (p1,
+      2026-08-08) — `npm test` 71 unchanged; preflight 3 tests;
+      lint/astro check/build clean
 
 ### Phase 2: RLS isolation suite
 
 #### Automated
-- [ ] 8 isolation tests green
+- [x] 8 isolation tests green (p2) — all gates clean
 
 ### Phase 3: ACL regression assertion
 
 #### Automated
-- [ ] ACL matrix + relrowsecurity green
+- [x] ACL matrix (24 cells) + relrowsecurity green (p3). Implementation
+      note: boolean concatenated into text casts as `true`/`false`, not
+      the bare-column `t`/`f` — first run caught this in the parser.
 
 ### Phase 4: Injection / validation parity
 
 #### Automated
-- [ ] 6 parity tests green
+- [x] 6 parity tests green (p4) — integration total 19; all gates clean
 
 ### Phase 5: Adversarial gate + docs
 
 #### Automated
-- [ ] full suites green post-reset
+- [x] post-reset: `npm run test:integration` 19 green, `npm test` 71 green
 #### Manual
-- [ ] deliberate-break result documented here
+- [x] **Deliberate-break gate (2026-08-09)**: weakened one policy in the
+      LOCAL DB only (`alter policy subscriptions_select_own on
+      public.subscriptions using (true);` via psql — migration files
+      untouched). Result: 2 tests failed, exactly the ones that should —
+      "B cannot select A's data" (B saw A's row) and "A cannot forge
+      user_id on insert" (its B-side verification also caught the leak).
+      Restored with `npx supabase db reset` → 19/19 green again. The
+      suite demonstrably fails when isolation is broken.
