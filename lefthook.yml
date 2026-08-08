@@ -1,0 +1,9 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{ts,tsx,astro}"
+      run: npx eslint --fix {staged_files} --quiet && git add {staged_files}
+    related-tests:
+      glob: "src/**/*.{ts,tsx}"
+      run: AI_AGENT=1 npx vitest related {staged_files} --run

@@ -25,5 +25,24 @@
     "deny": [
       "Bash(rm -rf *)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=$(jq -r .tool_input.file_path); case \"$FILE\" in *.ts|*.tsx|*.astro) cd \"$CLAUDE_PROJECT_DIR\" && npx eslint --fix \"$FILE\" --quiet || exit 2;; esac'",
+            "timeout": 15000
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=$(jq -r .tool_input.file_path); case \"$FILE\" in *.ts|*.tsx) cd \"$CLAUDE_PROJECT_DIR\" && npx tsc --noEmit || exit 2;; esac'",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
   }
 }
