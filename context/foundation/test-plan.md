@@ -83,7 +83,7 @@ orchestrator updates Status as artifacts appear on disk.
 | 1 | API & RLS integration | Prove two-account isolation and honest API error/validation contracts on a real local database | #2, #5 (#3 → Phase 3) | integration (local Supabase), SQL ACL assertions | done | `context/changes/testing-api-rls-integration/` |
 | 2 | E2E critical flow | Prove signup → add → dashboard works in a real browser and shows hand-verifiable numbers | #4, #1 | e2e (Playwright) | done | `context/changes/e2e-critical-flow/` |
 | 3 | Error-path & secret hardening | Pin the swallowed-error fix with failing-first tests and make secret leakage mechanically checkable | #3, #6 | integration (induced failures), build-output scan | done | `context/changes/error-path-hardening/` |
-| 4 | Quality-gates wiring | Lock the floor: e2e in CI, secret scan in CI, post-deploy smoke checklist | cross-cutting, #7 | gates, manual smoke script | not started | — |
+| 4 | Quality-gates wiring | Lock the floor: e2e in CI, secret scan in CI, post-deploy smoke checklist | cross-cutting, #7 | gates, manual smoke script | done | — (wired directly: ci.yml, `scripts/post-deploy-smoke.sh`) |
 
 Phase 3 is intentionally sequenced to land with (or immediately after) the
 upcoming error-handling fix: its tests define the error contract
@@ -99,7 +99,7 @@ combined risk and cheaper to test than browser flows.
 | validation schemas | zod | 4.4 | Schemas already unit-tested; Phase 1 extends with abuse payloads |
 | integration (DB/API) | supabase CLI + Docker (local stack) | 2.23 | none yet — see Phase 1; real Postgres + RLS, two seeded users via local auth API (pattern proven manually in the F-01 archive) |
 | e2e | Playwright (Chromium) | 1.62 | Exists: 4 tests + auth setup in `e2e/` (`npm run test:e2e`, local stack required — see §6.3); generation governed by the `/10x-e2e` skill (CLAUDE.md): role-based locators, no `waitForTimeout`, independent tests with unique ids, `seed.spec.ts` exemplar |
-| secret scan | deterministic grep over build output | n/a | Exists: `npm run scan:secrets` (build + `scripts/scan-secrets.mjs` over `dist/client/**`; exit 2 on hit, needle names only — never values); CI wiring = Phase 4 |
+| secret scan | deterministic grep over build output | n/a | Exists: `npm run scan:secrets` (build + `scripts/scan-secrets.mjs` over `dist/client/**`; exit 2 on hit, needle names only — never values); CI runs `scan:secrets:dist` against the `ci` job's build |
 | (optional) AI-native | `/10x-e2e` review loop; vision caps only for visual-only risks — checked: 2026-08-08 | n/a | DOM snapshot is the default; do not use vision where a deterministic assertion exists |
 
 **Stack grounding tools (current session):**
@@ -127,9 +127,9 @@ phase lands; before that, the gate is `planned`.
 | unit — related tests on staged files | local pre-commit (lefthook `vitest related`) | required (wired) | arithmetic/schema regressions at commit time |
 | unit — full suite | CI on push/PR to `main` | required (wired) | anything the related-run missed |
 | integration — RLS isolation + API contracts | local, ad hoc: mandatory before merging any migration or API-route change; not in CI (needs Docker) | required after §3 Phase 1 | cross-account leaks, swallowed failures, validation gaps |
-| e2e — critical flows | CI on PR (and locally pre-push when touching auth/flow surfaces) | required after §3 Phase 2 | broken north-star flow, gating regressions |
-| secret-leak bundle scan | CI on PR | required after §3 Phase 3 | server secrets in client output |
-| post-deploy smoke (3-check list) | manually after `wrangler deploy` | recommended after §3 Phase 4 | local-pass/prod-dead config failures |
+| e2e — critical flows | CI on push/PR (`e2e` job: local Supabase stack + Playwright) and locally pre-push when touching auth/flow surfaces | required (wired) | broken north-star flow, gating regressions |
+| secret-leak bundle scan | CI on push/PR (`scan:secrets:dist` after the `ci` job's build) | required (wired) | server secrets in client output |
+| post-deploy smoke (3-check list) | `npm run smoke:prod [-- <url>]` manually after `wrangler deploy` (`scripts/post-deploy-smoke.sh`) | recommended (wired: scripted) | local-pass/prod-dead config failures |
 
 No gate is aspirational: every non-wired row is owned by a named rollout
 phase. Integration stays out of CI deliberately (solo project, Docker
@@ -195,7 +195,9 @@ the relevant rollout phase ships; before that, the sub-section reads
   bound to the test-plan risk it protects. Run: `npm run test:e2e`
   (all) or `npx playwright test <name>` (one spec). Requires the local
   Supabase stack (`npx supabase start` first) — global setup fails fast
-  with a diagnostic when it's down. NOT in CI (wiring = §3 Phase 4).
+  with a diagnostic when it's down. Runs in CI too (`e2e` job in ci.yml:
+  `npx supabase start`, env files pointed at the CI-local stack, then
+  `npm run test:e2e`).
 - **Pattern**: model every new test on `e2e/seed.spec.ts` — role/label
   locators, one setup → action → assert → cleanup cycle per test, state
   waits only (`waitForURL` / `toBeVisible` / `toHaveCount`), unique
@@ -253,14 +255,33 @@ the relevant rollout phase ships; before that, the sub-section reads
   new endpoint: induced failure → non-2xx with a usable `{ error }` body
   that carries no backend detail (risk #6); the 401 `{ error }` shape; the
   PGRST116 → 404 mapping where `.single()` no-rows means not-found; for
-  form-post routes, failure → redirect with `?error=` (never a fake
-  success redirect).
+  form-post routes, failure → redirect with a short `?error=` CODE from
+  `src/lib/auth-errors.ts` (never free text, never a fake success
+  redirect) — pages map codes to fixed messages and collapse unknown
+  codes to the generic one.
 
 ### 6.5 Per-rollout-phase notes
 
 (Filled by each phase's final sub-phase with anything surprising the
 phase taught.)
 
+- **Phase 4 (quality-gates wiring)**: the e2e CI job needs NO pre-created
+  env files — global-setup's swap handles absent `.env`/`.dev.vars` (writes
+  local values, teardown deletes them); CI still creates them from
+  `supabase status` as a fail-fast contract check. The stack key match is
+  version-coupling, not luck: `npx supabase` resolves the repo-pinned CLI
+  devDependency, so the minted demo anon JWT equals the one
+  `e2e/support/env.ts` hardcodes — an unpinned setup-cli "latest" could
+  mint the new `sb_publishable_…` format and break the swap silently. The
+  `e2e` job runs parallel to `ci` (no `needs`): solo project, feedback
+  speed beats the marginal cost. The scan step reuses the `ci` job's build
+  (`scan:secrets:dist`) and gets the repo secrets in env so the VALUE scan
+  is not hollow (the scanner warns when it would be). Smoke oracle: the
+  pinned 401 from an unauthenticated API GET doubles as the "API surface
+  alive in prod" probe — 404/500 there is exactly the local-pass/prod-dead
+  burn. Follow-up landed with the phase: signin/signup/signout redirect
+  with short `?error=` codes mapped in `src/lib/auth-errors.ts`; pages
+  collapse unknown codes to a generic message (content spoofing dead).
 - **Phase 3 (`error-path-hardening`)**: the audit found the JSON API
   already honest — the one real swallow was auth-shaped:
   `await supabase.auth.signOut();` discarded `{ error }`, and supabase-js
