@@ -143,7 +143,12 @@ function formatIsoDate({ year, month, day }: DateParts): string {
 }
 
 function utcDayNumber({ year, month, day }: DateParts): number {
-  return Date.UTC(year, month - 1, day) / MS_PER_DAY;
+  // Not Date.UTC(year, ...): it maps years 0–99 to 1900+year, which would
+  // silently shift a mistyped anchor year (e.g. 0026 for 2026) by 19 centuries
+  // and misalign the weekly grid. setUTCFullYear takes the year literally.
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  return date.getTime() / MS_PER_DAY;
 }
 
 function addDays(parts: DateParts, days: number): DateParts {
