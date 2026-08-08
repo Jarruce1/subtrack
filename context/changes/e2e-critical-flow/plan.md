@@ -331,12 +331,13 @@ run is killed hard, restore manually from `*.e2e-backup`.
       confirmed in LOCAL auth.users; unit(99)/lint/check/build clean.
       Two discoveries: Playwright starts webServer BEFORE globalSetup
       (server lifecycle moved into globalSetup) and React islands need a
-      hydration wait before form fills (e2e/support/hydration.ts)
+      hydration wait before form fills (e2e/support/hydration.ts) — 7987ef1
 
 ### Phase 2: Seed test (conventions exemplar)
 
 #### Automated
-- [ ] 2.1 seed.spec.ts green; gates clean
+- [x] 2.1 seed.spec.ts green (first run); lint + unit(99) clean; env
+      files restored after run
 
 ### Phase 3: Risk tests
 
