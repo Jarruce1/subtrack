@@ -25,6 +25,8 @@ export default function DeleteSubscriptionButton({ id, name }: DeleteSubscriptio
     try {
       const response = await fetch(`/api/subscriptions/${id}`, { method: "DELETE" });
 
+      // Navigation paths keep the button disabled until the page unloads —
+      // resetting state here would briefly re-enable it mid-navigation.
       if (response.status === 204) {
         window.location.assign("/subscriptions");
         return;
@@ -34,16 +36,15 @@ export default function DeleteSubscriptionButton({ id, name }: DeleteSubscriptio
         return;
       }
       if (response.status === 404) {
-        // Stale row (deleted in another tab); a reload clears it.
-        setError("Already deleted — refresh the page.");
+        // Stale row (deleted in another tab); reload for a fresh SSR list.
+        window.location.reload();
         return;
       }
       setError("Could not delete. Please try again.");
     } catch {
       setError("Could not reach the server. Please try again.");
-    } finally {
-      setDeleting(false);
     }
+    setDeleting(false);
   }
 
   return (
