@@ -21,6 +21,11 @@ pnpm-debug.log*
 .dev.vars
 .wrangler/
 
+# supabase local runtime state (also in supabase/.gitignore; mirrored here so
+# eslint's includeIgnoreFile — which reads only this file — skips it)
+supabase/.temp/
+supabase/.branches/
+
 # macOS-specific files
 .DS_Store
 

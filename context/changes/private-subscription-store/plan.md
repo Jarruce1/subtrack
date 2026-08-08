@@ -282,15 +282,15 @@ Behavioral invariants:
 
 #### Automated
 
-- [x] 1.1 Migration applies from zero: `npx supabase db reset` completes without error
+- [x] 1.1 Migration applies from zero: `npx supabase db reset` completes without error — f7ebbc7
 
 #### Manual
 
-- [x] 1.2 Isolation: user A's rows invisible and unmodifiable for user B (select 0, update/delete affect 0)
-- [x] 1.3 Anti-forgery: insert/update with another user's `user_id` rejected by policy `WITH CHECK`
-- [x] 1.4 Anon deny: `anon` role selects 0 rows and cannot insert
-- [x] 1.5 Constraints: non-positive amount, empty name, bad currency, custom/interval mismatch, out-of-enum values all rejected
-- [x] 1.6 Trigger: `updated_at` bumps on update
+- [x] 1.2 Isolation: user A's rows invisible and unmodifiable for user B (select 0, update/delete affect 0) — f7ebbc7
+- [x] 1.3 Anti-forgery: insert/update with another user's `user_id` rejected by policy `WITH CHECK` — f7ebbc7
+- [x] 1.4 Anon deny: `anon` role selects 0 rows and cannot insert — f7ebbc7
+- [x] 1.5 Constraints: non-positive amount, empty name, bad currency, custom/interval mismatch, out-of-enum values all rejected — f7ebbc7
+- [x] 1.6 Trigger: `updated_at` bumps on update — f7ebbc7
 
 > Phase 1 verification notes (run autonomously via psql against the local stack, two signup-created users): 1.2 — B `count(*)` = 0, `UPDATE 0`, `DELETE 0` against A's row; 1.3 — both forgeries fail with `new row violates row-level security policy`; 1.4 — anon select AND insert fail with `permission denied` (stronger than the planned "0 rows": the Supabase postgres 17 image grants API roles no DML by default, so the migration adds an explicit DML grant to `authenticated` only — anon is denied at the privilege layer on top of having no RLS policy; end state "anon can read or write nothing" holds); 1.5 — six rejections via `subscriptions_amount_check`, `subscriptions_name_check`, `subscriptions_currency_check`, `subscriptions_cycle_interval_check` (×2), enum error for `Gaming`; 1.6 — `updated_at > created_at` after update (`t`). Sanity: valid `custom` + interval insert accepted.
 
@@ -298,13 +298,15 @@ Behavioral invariants:
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes with generated types and typed client factory
-- [ ] 2.2 `npm run build` passes without a running database
-- [ ] 2.3 Type regeneration is idempotent (no diff on re-run)
+- [x] 2.1 `npm run lint` passes with generated types and typed client factory
+- [x] 2.2 `npm run build` passes without a running database
+- [x] 2.3 Type regeneration is idempotent (no diff on re-run)
 
 #### Manual
 
-- [ ] 2.4 Auth flows still work in `npm run dev` (sign in, `/dashboard`, sign out)
+- [x] 2.4 Auth flows still work in `npm run dev` (sign in, `/dashboard`, sign out)
+
+> Phase 2 verification notes (run autonomously): 2.1/2.2 — lint and build clean; the generated file carries `/* eslint-disable */` in its hand-added header (generated code is exempt from the stylistic type rules it trips), and `supabase/.temp/`+`.branches/` were mirrored into the root `.gitignore` so eslint's `includeIgnoreFile` skips the CLI's runtime files. 2.3 — regeneration procedure (gen + header + prettier) rediffed clean against the committed file. Deviation: `npx supabase gen types typescript --local` fails in CLI 2.113.0 ("password authentication failed" inside the generator container); the equivalent `--db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres" --schema public` against the same local stack is used instead and recorded in AGENTS.md and the file header. 2.4 — smoke via dev server + curl with `.env`/`.dev.vars` temporarily pointed at the local stack (restored afterwards; `.dev.vars` overrides `.env` under the Cloudflare adapter): unauthenticated `/dashboard` → 302 `/auth/signin`; signin as a@test.local → 302 `/`; `/dashboard` → 200 rendering the user email and Sign out; signout → 302 `/`; `/dashboard` → 302 `/auth/signin` again.
 
 ### Phase 3: Subscription service layer
 

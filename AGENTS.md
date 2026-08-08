@@ -26,6 +26,7 @@ SubTrack — a subscription cost & renewal tracker (product scope: @context/foun
 - API routes in `src/pages/api/` validate input with zod (not yet a dependency — install it with the first validated route).
 - Auth: @src/middleware.ts resolves the session into `context.locals.user` and gates paths listed in its `PROTECTED_ROUTES`; add new protected pages there. The Supabase SSR client factory @src/lib/supabase.ts returns `null` when env vars are missing — callers must handle that.
 - Supabase migrations: `supabase/migrations/`, named `YYYYMMDDHHmmss_short_description.sql`.
+- `src/db/database.types.ts` is generated against the local schema (`npx supabase gen types typescript --db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres" --schema public` — the `--local` flag is broken in CLI 2.113.0 — then `npx prettier --write` it), committed, and regenerated manually after every migration; app code imports domain types from `src/types.ts`, never from the generated file.
 
 ## Commits & process
 
