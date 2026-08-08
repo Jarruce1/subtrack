@@ -1,3 +1,7 @@
+# Project rules
+
+@AGENTS.md is the single source of truth for project rules (structure, commands, conventions, hard rules). Do not duplicate project rules here — edit AGENTS.md instead.
+
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
 ## 10xDevs AI Toolkit - Module 3, Lesson 4 (E2E Tests)
