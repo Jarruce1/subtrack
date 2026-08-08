@@ -15,7 +15,7 @@ SubTrack — a subscription cost & renewal tracker (product scope: @context/foun
 - `npm run dev` / `npm run build` / `npm run preview` (scripts: @package.json)
 - `npm run lint` / `npm run lint:fix` — type-checked ESLint (`strictTypeChecked` + `stylisticTypeChecked`); `no-console` warns, unused vars must be `_`-prefixed (@eslint.config.js)
 - `npx supabase start` — local Supabase (requires Docker); `npx wrangler deploy` — deploy
-- Node 22.14.0 (@.nvmrc). Pre-commit: husky + lint-staged (`eslint --fix`, `prettier --write`). CI (@.github/workflows/ci.yml) runs `astro sync` + lint + build on push/PR to `main`; build needs `SUPABASE_URL`/`SUPABASE_KEY` repo secrets.
+- Node 22.14.0 (@.nvmrc). Pre-commit: lefthook (@lefthook.yml — `eslint --fix` + `vitest related` on staged files). CI (@.github/workflows/ci.yml) runs `astro sync` + lint + test + build on push/PR to `main`; build needs `SUPABASE_URL`/`SUPABASE_KEY` repo secrets.
 
 ## Structure & conventions
 
