@@ -1,5 +1,5 @@
 // Example-based specification of src/lib/billing.ts, traceable to PRD
-// Business Logic §1–§3 and US-01/US-02 (context/foundation/prd.md). Each case
+// Business Logic §1–§4 and US-01/US-02 (context/foundation/prd.md). Each case
 // cites its source so a failure reads as a spec violation. The generated-input
 // safety net lives in billing.properties.test.ts.
 import { describe, expect, it } from "vitest";

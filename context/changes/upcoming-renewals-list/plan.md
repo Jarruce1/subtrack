@@ -43,7 +43,7 @@ Two phases, each independently green. Phase 1 lands the pure derivation (`upcomi
 
 ## Critical Implementation Details
 
-- **Merge hygiene with S-03**: the `dashboard.astro` edit must be exactly (a) one added import line + one added `const upcoming = …` line in the frontmatter, and (b) one new `<section>…</section>` block inserted between the existing "Active totals" and "Subscriptions" sections. Do not reflow, reindent, or touch any existing line — S-03 adds one link line to this file in a parallel worktree and the merge must be conflict-free.
+- **Merge hygiene with S-03**: the `dashboard.astro` edit must be exactly (a) `upcomingRenewals` appended to the existing `@/lib/billing` import + one added `const upcoming = …` line in the frontmatter, and (b) one new `<section>…</section>` block inserted between the existing "Active totals" and "Subscriptions" sections. Do not reflow, reindent, or touch any other existing line — S-03 adds one link line to this file in a parallel worktree and the merge must be conflict-free. _(Impl-review OBS-1 wording fix: the original "one added import line" contradicted the Phase 2 contract, which extends the existing import specifier list.)_
 - **Window semantics**: PRD §4 is "today through today + 30 days" — both endpoints inclusive, so the window spans 31 calendar days. `windowEnd = formatIsoDate(addDays(parseIsoDate(today), 30))`; include iff `renewalDate <= windowEnd`. An invalid `today` must throw even for an empty/inactive input list (the window computation parses `today` before any filtering — consistent with `nextRenewalDate`'s validate-first posture).
 
 ## Phase 1: §4 derivation — `upcomingRenewals` + unit tests

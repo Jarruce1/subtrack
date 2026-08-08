@@ -1,7 +1,7 @@
 ---
 change_id: upcoming-renewals-list
 title: Upcoming renewals in the next 30 days on the dashboard (S-05)
-status: implemented
+status: impl_reviewed
 created: 2026-08-08
 updated: 2026-08-08
 archived_at: null
