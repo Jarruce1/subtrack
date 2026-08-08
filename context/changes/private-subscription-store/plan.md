@@ -298,13 +298,13 @@ Behavioral invariants:
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes with generated types and typed client factory
-- [x] 2.2 `npm run build` passes without a running database
-- [x] 2.3 Type regeneration is idempotent (no diff on re-run)
+- [x] 2.1 `npm run lint` passes with generated types and typed client factory — 09359e2
+- [x] 2.2 `npm run build` passes without a running database — 09359e2
+- [x] 2.3 Type regeneration is idempotent (no diff on re-run) — 09359e2
 
 #### Manual
 
-- [x] 2.4 Auth flows still work in `npm run dev` (sign in, `/dashboard`, sign out)
+- [x] 2.4 Auth flows still work in `npm run dev` (sign in, `/dashboard`, sign out) — 09359e2
 
 > Phase 2 verification notes (run autonomously): 2.1/2.2 — lint and build clean; the generated file carries `/* eslint-disable */` in its hand-added header (generated code is exempt from the stylistic type rules it trips), and `supabase/.temp/`+`.branches/` were mirrored into the root `.gitignore` so eslint's `includeIgnoreFile` skips the CLI's runtime files. 2.3 — regeneration procedure (gen + header + prettier) rediffed clean against the committed file. Deviation: `npx supabase gen types typescript --local` fails in CLI 2.113.0 ("password authentication failed" inside the generator container); the equivalent `--db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres" --schema public` against the same local stack is used instead and recorded in AGENTS.md and the file header. 2.4 — smoke via dev server + curl with `.env`/`.dev.vars` temporarily pointed at the local stack (restored afterwards; `.dev.vars` overrides `.env` under the Cloudflare adapter): unauthenticated `/dashboard` → 302 `/auth/signin`; signin as a@test.local → 302 `/`; `/dashboard` → 200 rendering the user email and Sign out; signout → 302 `/`; `/dashboard` → 302 `/auth/signin` again.
 
@@ -312,9 +312,11 @@ Behavioral invariants:
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes with the service module
-- [ ] 3.2 `npm run build` passes
+- [x] 3.1 `npm run lint` passes with the service module
+- [x] 3.2 `npm run build` passes
 
 #### Manual
 
-- [ ] 3.3 Invariant review: no `user_id` handling, no own client, not-found mapping per contract
+- [x] 3.3 Invariant review: no `user_id` handling, no own client, not-found mapping per contract
+
+> Phase 3 verification notes (run autonomously): 3.1/3.2 — lint exit 0, build exit 0 (plus `npx astro check`: 0 errors, 0 warnings). 3.3 — reviewed against the contract: the service never references `user_id` (inserts rely on the column's `auth.uid()` default; input types omit identity/audit fields), imports only the `TypedSupabaseClient` type from `@/lib/supabase` (no client creation, no service-role key), `getSubscription` uses `maybeSingle()` → `null`, `updateSubscription` maps PostgREST `PGRST116` (no row after RLS filtering) → `null`, `deleteSubscription` returns `data.length > 0`, `listSubscriptions` orders by `created_at desc`, and all other `PostgrestError`s are thrown as `Error(error.message)`.
