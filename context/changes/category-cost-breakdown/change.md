@@ -1,7 +1,7 @@
 ---
 change_id: category-cost-breakdown
 title: Cost totals per category on the dashboard (S-06)
-status: implemented
+status: impl_reviewed
 created: 2026-08-08
 updated: 2026-08-09
 archived_at: null
