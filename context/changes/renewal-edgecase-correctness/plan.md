@@ -263,9 +263,9 @@ None — no schema, data, or runtime behavior changes. The only shared-surface e
 
 #### Automated
 
-- [x] 2.1 `npm test` exits 0 with the full example suite (all §1–§3 oracles, F1 regression, invalid-input throws) passing
-- [x] 2.2 `npm run lint` exits 0
-- [x] 2.3 `grep -q "npm test" .github/workflows/ci.yml` succeeds (test step present, ordered after lint)
+- [x] 2.1 `npm test` exits 0 with the full example suite (all §1–§3 oracles, F1 regression, invalid-input throws) passing — 9b249bb
+- [x] 2.2 `npm run lint` exits 0 — 9b249bb
+- [x] 2.3 `grep -q "npm test" .github/workflows/ci.yml` succeeds (test step present, ordered after lint) — 9b249bb
 
 #### Manual
 
@@ -275,10 +275,10 @@ None — no schema, data, or runtime behavior changes. The only shared-surface e
 
 #### Automated
 
-- [ ] 3.1 `npm test` exits 0 with both suites (examples + properties) passing
-- [ ] 3.2 Total `npm test` wall time under ~10 s locally
-- [ ] 3.3 `npm run lint` exits 0
+- [x] 3.1 `npm test` exits 0 with both suites (examples + properties) passing
+- [x] 3.2 Total `npm test` wall time under ~10 s locally
+- [x] 3.3 `npm run lint` exits 0
 
 #### Manual
 
-- [ ] 3.4 Harness sanity spot-check: temporarily invert the clamp (`Math.min` → `Math.max` in `occurrenceAtMonths`, `src/lib/billing.ts:164`), run `npm test`, confirm multiple example and property failures, then revert the mutation
+- [x] 3.4 Harness sanity spot-check: temporarily invert the clamp (`Math.min` → `Math.max` in `occurrenceAtMonths`, `src/lib/billing.ts:164`), run `npm test`, confirm multiple example and property failures, then revert the mutation _(performed 2026-08-08: mutation produced 14 failures — 9 example + 5 property; reverted, `git diff` clean, suite green again)_
