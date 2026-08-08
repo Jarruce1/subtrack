@@ -1,4 +1,12 @@
-import type { BillingCycle, CurrencyTotal, NormalizedCost, Subscription, UpcomingRenewal } from "@/types";
+import type {
+  BillingCycle,
+  CategoryTotal,
+  CurrencyTotal,
+  NormalizedCost,
+  Subscription,
+  SubscriptionCategory,
+  UpcomingRenewal,
+} from "@/types";
 
 // Pure billing arithmetic (PRD Business Logic §1–3). No I/O, no Date.now():
 // `today` is always a parameter, so every function is deterministic and
@@ -97,6 +105,35 @@ export function summarizeActive(subscriptions: Subscription[]): CurrencyTotal[] 
     }
   }
   return [...totals.values()].sort((a, b) => a.currency.localeCompare(b.currency));
+}
+
+/**
+ * Active-only per-category, per-currency totals (Business Logic §3 / FR-012).
+ * Partitions the input by category and delegates each partition to
+ * `summarizeActive`, so the aggregation rule (active filter, unrounded
+ * normalized sums, per-currency grouping — currencies never merged or
+ * converted) is defined in exactly one place and the category view cannot
+ * drift from the overall totals (test-plan risk #1). A category whose
+ * subscriptions are all paused/cancelled yields no rows. Rows are sorted by
+ * category, then currency.
+ */
+export function summarizeByCategory(subscriptions: Subscription[]): CategoryTotal[] {
+  const partitions = new Map<SubscriptionCategory, Subscription[]>();
+  for (const subscription of subscriptions) {
+    const partition = partitions.get(subscription.category);
+    if (partition) {
+      partition.push(subscription);
+    } else {
+      partitions.set(subscription.category, [subscription]);
+    }
+  }
+  const rows: CategoryTotal[] = [];
+  for (const [category, partition] of partitions) {
+    for (const { currency, monthly, yearly } of summarizeActive(partition)) {
+      rows.push({ category, currency, monthly, yearly });
+    }
+  }
+  return rows.sort((a, b) => a.category.localeCompare(b.category) || a.currency.localeCompare(b.currency));
 }
 
 /**
