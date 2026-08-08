@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "format": "prettier --write ."
   },
@@ -42,6 +43,7 @@
     "@eslint/compat": "^2.0.3",
     "@eslint/js": "^9.29.0",
     "@fast-check/vitest": "^0.4.1",
+    "@playwright/test": "^1.62.1",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.7.0",

@@ -21,6 +21,13 @@ pnpm-debug.log*
 .dev.vars
 .wrangler/
 
+# playwright (e2e) runtime artifacts
+playwright/.auth/
+test-results/
+playwright-report/
+.dev.vars.e2e-backup
+.env.e2e-backup
+
 # supabase local runtime state (also in supabase/.gitignore; mirrored here so
 # eslint's includeIgnoreFile — which reads only this file — skips it)
 supabase/.temp/
