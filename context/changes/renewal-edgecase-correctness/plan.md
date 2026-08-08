@@ -255,21 +255,21 @@ None — no schema, data, or runtime behavior changes. The only shared-surface e
 
 #### Automated
 
-- [x] 1.1 `npm test` exits 0 with the smoke test passing
-- [x] 1.2 `npm run lint` exits 0 (new files pass strictTypeChecked + prettier)
-- [x] 1.3 `npm run build` exits 0 (app build unaffected)
+- [x] 1.1 `npm test` exits 0 with the smoke test passing — 2453e17
+- [x] 1.2 `npm run lint` exits 0 (new files pass strictTypeChecked + prettier) — 2453e17
+- [x] 1.3 `npm run build` exits 0 (app build unaffected) — 2453e17
 
 ### Phase 2: Example-Based PRD Suite + CI
 
 #### Automated
 
-- [ ] 2.1 `npm test` exits 0 with the full example suite (all §1–§3 oracles, F1 regression, invalid-input throws) passing
-- [ ] 2.2 `npm run lint` exits 0
-- [ ] 2.3 `grep -q "npm test" .github/workflows/ci.yml` succeeds (test step present, ordered after lint)
+- [x] 2.1 `npm test` exits 0 with the full example suite (all §1–§3 oracles, F1 regression, invalid-input throws) passing
+- [x] 2.2 `npm run lint` exits 0
+- [x] 2.3 `grep -q "npm test" .github/workflows/ci.yml` succeeds (test step present, ordered after lint)
 
 #### Manual
 
-- [ ] 2.4 First CI run after the phase lands shows the test step green before the build step
+- [ ] 2.4 First CI run after the phase lands shows the test step green before the build step _(pending: work not pushed yet per instruction — verify on first push; step is wired after lint, before build, locally verified)_
 
 ### Phase 3: Property-Based Invariant Layer
 
