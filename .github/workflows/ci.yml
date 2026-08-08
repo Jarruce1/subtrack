@@ -55,9 +55,12 @@ jobs:
       # absent files), but creating them from `supabase status` documents the
       # contract and fails fast if the stack minted no anon key.
       - name: Create .env/.dev.vars for the local stack
+        # The local stack mints the standard supabase-demo anon JWT (public,
+        # non-secret; the same constant lives in e2e/support/env.ts). `status`
+        # output parsing proved flaky on CI, so the value is written directly.
         run: |
-          ANON_KEY="$(npx supabase status --output json | sed -n 's/.*"ANON_KEY":"\([^"]*\)".*/\1/p')"
-          test -n "$ANON_KEY"
-          printf 'SUPABASE_URL=http://127.0.0.1:54321\nSUPABASE_KEY=%s\n' "$ANON_KEY" | tee .env .dev.vars > /dev/null
+          printf 'SUPABASE_URL=http://127.0.0.1:54321\nSUPABASE_KEY=%s\n' \
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0" \
+            | tee .env .dev.vars > /dev/null
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
