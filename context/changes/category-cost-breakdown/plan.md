@@ -197,16 +197,16 @@ None — no schema, API, or data changes.
 
 #### Automated
 
-- [x] 2.1 Unit tests still pass: `npm test`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 Types check: `npx astro check`
-- [x] 2.4 Build passes: `npm run build`
+- [x] 2.1 Unit tests still pass: `npm test` — d5ec05c
+- [x] 2.2 Lint passes: `npm run lint` — d5ec05c
+- [x] 2.3 Types check: `npx astro check` — d5ec05c
+- [x] 2.4 Build passes: `npm run build` — d5ec05c
 
 #### Manual
 
-- [x] 2.5 Smoke against local stack: seeded subscriptions render grouped per category with per-currency monthly/yearly totals _(performed 2026-08-08/09, dev server :4403 against local Supabase — `.env`/`.dev.vars` temporarily swapped to the local stack and restored after (diff-verified); users `s06-breakdown-*`/`s06-allpaused-*`/`s06-nosubs-*`; section order totals → by category → upcoming → subscriptions; Software and Streaming groups rendered)_
-- [x] 2.6 Two currencies inside one category render as two separate rows — never merged or converted _(Software: PLN 20.00/month 240.00/year and USD $12.00/month $144.00/year as two rows)_
-- [x] 2.7 Paused and cancelled contribute nothing; all-inactive category absent from the section (rows still under Subscriptions) _(paused HBO excluded from Streaming total 43.00; cancelled-only Health & Fitness absent; both rows still listed with status under Subscriptions)_
-- [x] 2.8 Consistency visible in the rendered page: per currency, category rows sum to the Active totals number _(PLN: 20 + 43 = 63.00/month, 240 + 516 = 756.00/year = Active totals; USD: 12.00/144.00 = Active totals)_
-- [x] 2.9 User whose subscriptions are all paused sees "No active subscriptions." in the section _(quiet line rendered, 0 category groups)_
-- [x] 2.10 User with zero subscriptions still gets the original global empty state (no category section) _("No subscriptions yet" present, `category-heading` absent)_
+- [x] 2.5 Smoke against local stack: seeded subscriptions render grouped per category with per-currency monthly/yearly totals _(performed 2026-08-08/09, dev server :4403 against local Supabase — `.env`/`.dev.vars` temporarily swapped to the local stack and restored after (diff-verified); users `s06-breakdown-*`/`s06-allpaused-*`/`s06-nosubs-*`; section order totals → by category → upcoming → subscriptions; Software and Streaming groups rendered)_ — d5ec05c
+- [x] 2.6 Two currencies inside one category render as two separate rows — never merged or converted _(Software: PLN 20.00/month 240.00/year and USD $12.00/month $144.00/year as two rows)_ — d5ec05c
+- [x] 2.7 Paused and cancelled contribute nothing; all-inactive category absent from the section (rows still under Subscriptions) _(paused HBO excluded from Streaming total 43.00; cancelled-only Health & Fitness absent; both rows still listed with status under Subscriptions)_ — d5ec05c
+- [x] 2.8 Consistency visible in the rendered page: per currency, category rows sum to the Active totals number _(PLN: 20 + 43 = 63.00/month, 240 + 516 = 756.00/year = Active totals; USD: 12.00/144.00 = Active totals)_ — d5ec05c
+- [x] 2.9 User whose subscriptions are all paused sees "No active subscriptions." in the section _(quiet line rendered, 0 category groups)_ — d5ec05c
+- [x] 2.10 User with zero subscriptions still gets the original global empty state (no category section) _("No subscriptions yet" present, `category-heading` absent)_ — d5ec05c
