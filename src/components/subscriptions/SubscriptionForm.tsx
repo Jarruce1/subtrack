@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { normalizeName } from "@/lib/duplicates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,6 +62,13 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  // FR-014 advisory duplicate warning (S-07). `duplicateWarning` holds the
+  // matched stored name; the ref remembers the normalized name the user has
+  // already been warned about, so resubmitting it saves anyway ("the warning
+  // never blocks saving" — US-03), while editing to a different name re-arms
+  // the check.
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+  const acknowledgedNameRef = useRef<string | null>(null);
 
   function clearFieldError(field: string) {
     setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
@@ -81,8 +89,38 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
     };
   }
 
+  /**
+   * Advisory FR-014 check. Resolves to the matched existing subscription, or
+   * null. Fail-open by contract: any non-200 answer, network error, or parse
+   * error resolves to null so the save proceeds — the check must never be
+   * able to block a save.
+   */
+  async function checkDuplicate(candidateName: string): Promise<{ id: string; name: string } | null> {
+    try {
+      const query = new URLSearchParams({ name: candidateName });
+      if (subscription) {
+        query.set("exclude", subscription.id);
+      }
+      // Bounded wait: a hung advisory check must not hold the save hostage —
+      // the abort lands in the catch below and resolves fail-open.
+      const response = await fetch(`/api/subscriptions/duplicate-check?${query.toString()}`, {
+        signal: AbortSignal.timeout(2000),
+      });
+      if (response.status !== 200) {
+        return null;
+      }
+      const data = (await response.json()) as { duplicate?: boolean; match?: { id: string; name: string } | null };
+      return data.duplicate && data.match ? data.match : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting) {
+      return; // belt-and-braces double-submit guard alongside the disabled button
+    }
     setFormErrors([]);
 
     const parsed = subscriptionCreateSchema.safeParse(buildPayload());
@@ -96,6 +134,20 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
     setFieldErrors({});
     setSubmitting(true);
     try {
+      // Duplicate check runs once per candidate name, before the save fetch.
+      // Skipped when the name was already acknowledged (resubmit = "Save
+      // anyway") and when an edit keeps the row's own name (not a rename).
+      const candidate = normalizeName(parsed.data.name);
+      const isOwnUnchangedName = subscription !== undefined && candidate === normalizeName(subscription.name);
+      if (candidate !== acknowledgedNameRef.current && !isOwnUnchangedName) {
+        const match = await checkDuplicate(parsed.data.name);
+        if (match) {
+          acknowledgedNameRef.current = candidate;
+          setDuplicateWarning(match.name);
+          return;
+        }
+      }
+      setDuplicateWarning(null);
       const response = await fetch(isEdit ? `/api/subscriptions/${subscription.id}` : "/api/subscriptions", {
         method: isEdit ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,6 +201,10 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
           onChange={(e) => {
             setName(e.target.value);
             clearFieldError("name");
+            // Editing the name invalidates the shown warning; the
+            // acknowledged marker stays, so resubmitting the identical
+            // name still saves without re-warning.
+            setDuplicateWarning(null);
           }}
           placeholder="Netflix"
           aria-invalid={Boolean(fieldError("name"))}
@@ -305,6 +361,16 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
         />
       </Field>
 
+      {duplicateWarning !== null && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200"
+        >
+          You already track a subscription named &ldquo;{duplicateWarning}&rdquo;. You can save anyway &mdash;
+          duplicates are allowed.
+        </div>
+      )}
+
       {formErrors.length > 0 && (
         <div
           role="alert"
@@ -317,7 +383,13 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
       )}
 
       <Button type="submit" disabled={submitting} className="w-full">
-        {submitting ? "Saving…" : isEdit ? "Save changes" : "Add subscription"}
+        {submitting
+          ? "Saving…"
+          : duplicateWarning !== null
+            ? "Save anyway"
+            : isEdit
+              ? "Save changes"
+              : "Add subscription"}
       </Button>
     </form>
   );

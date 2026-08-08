@@ -21,6 +21,17 @@ export async function listSubscriptions(supabase: TypedSupabaseClient): Promise<
   return data;
 }
 
+/** Lean projection for the FR-014 duplicate check (S-07): the caller's `{id, name}` pairs only. */
+export async function listSubscriptionNames(
+  supabase: TypedSupabaseClient,
+): Promise<Pick<Subscription, "id" | "name">[]> {
+  const { data, error } = await supabase.from("subscriptions").select("id, name");
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
 /** Resolves to null when the row does not exist or is not owned by the caller — RLS makes these indistinguishable (deliberate). */
 export async function getSubscription(supabase: TypedSupabaseClient, id: string): Promise<Subscription | null> {
   const { data, error } = await supabase.from("subscriptions").select("*").eq("id", id).maybeSingle();
