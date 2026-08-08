@@ -377,7 +377,7 @@ run is killed hard, restore manually from `*.e2e-backup`.
       checksums identical after each run); unit 99 green; lint 0
       problems; astro check 0/0; build clean; docs updated (test-plan
       §3 Phase 2 → done, §4 e2e row, §6.3 cookbook, §6.5 phase note;
-      AGENTS.md "How we test" E2E bullet)
+      AGENTS.md "How we test" E2E bullet) — 5b3541b
 #### Manual
 - [x] 4.2 **Deliberate-break gate (2026-08-09)** — production behavior
       inverted transiently, never committed:
@@ -388,4 +388,4 @@ run is killed hard, restore manually from `*.e2e-backup`.
       cross-view red (PLN total 100 ≠ 40) — the aggregation rule is
       protected by exactly the test that owns it.
       Both reverts verified: `git diff -- src/` empty, suite 5/5 green
-      again.
+      again. — 5b3541b
