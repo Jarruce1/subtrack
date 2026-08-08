@@ -255,9 +255,9 @@ None — no schema, data, or runtime behavior changes. The only shared-surface e
 
 #### Automated
 
-- [ ] 1.1 `npm test` exits 0 with the smoke test passing
-- [ ] 1.2 `npm run lint` exits 0 (new files pass strictTypeChecked + prettier)
-- [ ] 1.3 `npm run build` exits 0 (app build unaffected)
+- [x] 1.1 `npm test` exits 0 with the smoke test passing
+- [x] 1.2 `npm run lint` exits 0 (new files pass strictTypeChecked + prettier)
+- [x] 1.3 `npm run build` exits 0 (app build unaffected)
 
 ### Phase 2: Example-Based PRD Suite + CI
 
