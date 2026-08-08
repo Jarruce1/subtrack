@@ -31,7 +31,7 @@ People with 5–30 subscriptions have charges scattered across statements and in
 
 | ID   | Change ID                   | Outcome (user can …)                                                              | Prerequisites | PRD refs                                                    | Status   |
 | ---- | --------------------------- | --------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------- | -------- |
-| F-01 | private-subscription-store  | (foundation) per-user subscription storage with enforced account isolation         | —             | FR-004, Access Control, NFR (privacy)                       | ready    |
+| F-01 | private-subscription-store  | (foundation) per-user subscription storage with enforced account isolation         | —             | FR-004, Access Control, NFR (privacy)                       | planning |
 | S-01 | first-subscription-dashboard | register, add first subscription, see dashboard with normalized cost + next renewal | F-01          | US-01, FR-001, FR-002, FR-003, FR-004, FR-009, FR-010, FR-011 | proposed |
 | S-02 | renewal-edgecase-correctness | trust renewal dates across month-end and leap-year cases                           | S-01          | US-02, FR-010, NFR (correctness)                            | proposed |
 | S-03 | manage-subscription-list    | view all subscriptions with status, edit any field, delete an entry                | S-01          | FR-005, FR-006, FR-007                                      | proposed |
@@ -77,7 +77,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Deliberately minimal — one entity, no seeds, no extras — so S-01 still integrates the data layer end-to-end; getting the isolation policy wrong here would violate the PRD's privacy guardrail silently, which is why it is a foundation rather than a side effect of S-01.
-- **Status:** ready
+- **Status:** planning
 
 ## Slices
 
