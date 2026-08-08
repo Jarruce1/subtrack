@@ -260,38 +260,40 @@ FR-006: generalize the add form into a dual-mode `SubscriptionForm`, host it on 
 
 #### Automated
 
-- [x] 1.1 `npm run lint` passes
-- [x] 1.2 `npx astro check` passes
-- [x] 1.3 `npm run build` passes
-- [x] 1.4 `npm test` passes (new schema tests green)
+- [x] 1.1 `npm run lint` passes — 5d4b294
+- [x] 1.2 `npx astro check` passes — 5d4b294
+- [x] 1.3 `npm run build` passes — 5d4b294
+- [x] 1.4 `npm test` passes (new schema tests green) — 5d4b294
 
 #### Manual
 
-- [x] 1.5 No cookie → PATCH and DELETE both 401
-- [x] 1.6 `PATCH {}` → 400 "Provide at least one field to update"
-- [x] 1.7 `PATCH {"name": ...}` → 200 with updated row, other fields unchanged
-- [x] 1.8 `PATCH {"billing_cycle": "custom"}` without interval → 400
-- [x] 1.9 Foreign id → 404 for PATCH and DELETE (identical to nonexistent)
-- [x] 1.10 Malformed id → 404 (not 500)
-- [x] 1.11 DELETE own id → 204; repeat → 404
+- [x] 1.5 No cookie → PATCH and DELETE both 401 — 5d4b294
+- [x] 1.6 `PATCH {}` → 400 "Provide at least one field to update" — 5d4b294
+- [x] 1.7 `PATCH {"name": ...}` → 200 with updated row, other fields unchanged — 5d4b294
+- [x] 1.8 `PATCH {"billing_cycle": "custom"}` without interval → 400 — 5d4b294
+- [x] 1.9 Foreign id → 404 for PATCH and DELETE (identical to nonexistent) — 5d4b294
+- [x] 1.10 Malformed id → 404 (not 500) — 5d4b294
+- [x] 1.11 DELETE own id → 204; repeat → 404 — 5d4b294
 
 ### Phase 2: Subscription list page with delete, dashboard navigation
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npx astro check` passes
-- [ ] 2.3 `npm run build` passes
-- [ ] 2.4 `npm test` passes
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npx astro check` passes
+- [x] 2.3 `npm run build` passes
+- [x] 2.4 `npm test` passes
 
 #### Manual
 
-- [ ] 2.5 Unauthenticated `/subscriptions` → redirect to signin
-- [ ] 2.6 Mixed subscriptions render with status badge, raw + normalized costs matching dashboard
-- [ ] 2.7 Zero subscriptions → explanatory empty state
-- [ ] 2.8 Delete: cancel keeps row (no request); confirm removes row; totals updated
-- [ ] 2.9 Dashboard Manage link works; dashboard.astro diff is one added line
-- [ ] 2.10 Edit links point at `/subscriptions/<id>/edit` (page arrives in Phase 3 — transiently 404s; acceptable mid-change)
+- [x] 2.5 Unauthenticated `/subscriptions` → redirect to signin
+- [x] 2.6 Mixed subscriptions render with status badge, raw + normalized costs matching dashboard
+- [x] 2.7 Zero subscriptions → explanatory empty state
+- [x] 2.8 Delete: cancel keeps row (no request); confirm removes row; totals updated
+- [x] 2.9 Dashboard Manage link works; dashboard.astro diff is one added line
+- [x] 2.10 Edit links point at `/subscriptions/<id>/edit` (page arrives in Phase 3 — transiently 404s; acceptable mid-change)
+
+> Phase 2 verification notes (run autonomously): lint/astro check (0 errors)/build/test all exit 0 (61 tests). Smoke on local stack (dev server port 4401, `.env`/`.dev.vars` temporarily pointed at local Supabase, restored after the run): unauth `/subscriptions` 302 → signin; user with active/paused/cancelled × PLN/EUR × monthly/yearly/custom-3 rows — all names, status badges, "every 3 months" label, raw + normalized costs (43.00/516.00 PLN; €120 yearly → €10.00 monthly) rendered; fresh user sees the empty state; DELETE flow: 204, fresh SSR render drops the row, dashboard totals lose the deleted active sub's amount; dashboard has exactly one `href="/subscriptions"` Manage link. `git diff --numstat dashboard.astro` = 3 added / 0 deleted — prettier's Astro parser force-wraps the anchor to 3 physical lines (single added element, still purely additive; the plan's "one added line" is satisfied in spirit, enforced by eslint-plugin-prettier). The confirm-dialog cancel path (`window.confirm` returning false → early return, no request) is client-side JS verified by code inspection — no headless browser dependency available in this worktree; browser-level interaction is E2E scope (module 3).
 
 ### Phase 3: Edit page with the generalized subscription form
 
