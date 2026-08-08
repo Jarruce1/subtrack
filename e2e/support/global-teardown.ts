@@ -9,8 +9,19 @@ import { PROJECT_ROOT, restoreEnvFiles } from "./env";
 // local stack after a completed run.
 
 const PID_FILE = path.join(PROJECT_ROOT, "test-results", ".astro-dev.pid");
+const EXIT_WAIT_MS = 5_000;
+const EXIT_POLL_MS = 100;
 
-export default function globalTeardown(): void {
+function isAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export default async function globalTeardown(): Promise<void> {
   try {
     if (existsSync(PID_FILE)) {
       const pid = Number(readFileSync(PID_FILE, "utf8").trim());
@@ -20,6 +31,20 @@ export default function globalTeardown(): void {
           process.kill(-pid, "SIGTERM");
         } catch {
           // already gone
+        }
+        // Wait for the port to actually free up so an immediately following
+        // run's port-in-use guard cannot trip on a dying server; escalate to
+        // SIGKILL if the group ignores SIGTERM.
+        const deadline = Date.now() + EXIT_WAIT_MS;
+        while (isAlive(pid) && Date.now() < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, EXIT_POLL_MS));
+        }
+        if (isAlive(pid)) {
+          try {
+            process.kill(-pid, "SIGKILL");
+          } catch {
+            // already gone
+          }
         }
       }
       rmSync(PID_FILE, { force: true });

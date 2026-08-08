@@ -389,3 +389,12 @@ run is killed hard, restore manually from `*.e2e-backup`.
       protected by exactly the test that owns it.
       Both reverts verified: `git diff -- src/` empty, suite 5/5 green
       again. — 5b3541b
+
+### Post-review fixes (impl-review, 2026-08-09)
+
+- [x] F1 fixed (see reviews/impl-review.md): global-teardown now waits
+      up to 5 s for the dev-server group to exit (SIGKILL escalation)
+      before restoring env files, closing the port-race window between
+      back-to-back runs. Re-verified: 2× `npm run test:e2e` green, lint
+      clean, env checksums intact. F2/F3 accepted with rationale.
+      Verdict: APPROVED.
