@@ -35,9 +35,9 @@ People with 5–30 subscriptions have charges scattered across statements and in
 | S-01 | first-subscription-dashboard | register, add first subscription, see dashboard with normalized cost + next renewal | F-01          | US-01, FR-001, FR-002, FR-003, FR-004, FR-009, FR-010, FR-011 | done |
 | S-02 | renewal-edgecase-correctness | trust renewal dates across month-end and leap-year cases                           | S-01          | US-02, FR-010, NFR (correctness)                            | done |
 | S-03 | manage-subscription-list    | view all subscriptions with status, edit any field, delete an entry                | S-01          | FR-005, FR-006, FR-007                                      | done |
-| S-04 | status-lifecycle-totals     | pause/cancel/reactivate and see totals + renewals reflect only active items        | S-03          | US-04, FR-008                                               | done |
+| S-04 | status-lifecycle-totals     | pause/cancel/reactivate and see totals + renewals reflect only active items        | S-03          | US-04, FR-008                                               | ready |
 | S-05 | upcoming-renewals-list      | see renewals due in the next 30 days, soonest first                                | S-01          | FR-013                                                      | done |
-| S-06 | category-cost-breakdown     | see cost totals broken down per category                                           | S-01          | FR-012                                                      | ready |
+| S-06 | category-cost-breakdown     | see cost totals broken down per category                                           | S-01          | FR-012                                                      | done |
 | S-07 | duplicate-name-warning      | get a non-blocking duplicate warning on add or rename, and save anyway             | S-01, S-03    | US-03, FR-014                                               | in-progress |
 
 ## Streams
@@ -151,7 +151,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Cheap once normalization exists (the PRD's own argument for keeping it); the only care point is reusing the exact same aggregation rule as the overall totals so the two never disagree.
-- **Status:** ready
+- **Status:** in-progress
 
 ### S-07: Duplicate warning on add and rename
 

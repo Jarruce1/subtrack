@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 // Standalone config on purpose — NOT `getViteConfig` from "astro/config": the
 // Astro wrapper crashes under Astro 6 + Vitest 4 (withastro/astro#15847) and
@@ -12,5 +12,11 @@ process.env.TZ ??= "UTC";
 
 export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-  test: { environment: "node", include: ["src/**/*.test.ts"] },
+  test: {
+    environment: "node",
+    include: ["src/**/*.test.ts"],
+    // Integration tests need the live local Supabase stack and run via
+    // `npm run test:integration` (vitest.integration.config.ts) only.
+    exclude: [...configDefaults.exclude, "src/tests/integration/**"],
+  },
 });

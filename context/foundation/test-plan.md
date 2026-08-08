@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-08-08
+> Last updated: 2026-08-09
 
 ## 1. Strategy
 
@@ -80,7 +80,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|------------|-----------------|----------------|------------|--------|----------------|
-| 1 | API & RLS integration | Prove two-account isolation and honest API error/validation contracts on a real local database | #2, #3, #5 | integration (local Supabase), SQL ACL assertions, schema unit extensions | not started | — |
+| 1 | API & RLS integration | Prove two-account isolation and honest API error/validation contracts on a real local database | #2, #5 (#3 → Phase 3) | integration (local Supabase), SQL ACL assertions | done | `context/changes/testing-api-rls-integration/` |
 | 2 | E2E critical flow | Prove signup → add → dashboard works in a real browser and shows hand-verifiable numbers | #4, #1 | e2e (Playwright) | not started | — |
 | 3 | Error-path & secret hardening | Pin the swallowed-error fix with failing-first tests and make secret leakage mechanically checkable | #3, #6 | integration (induced failures), build-output scan | not started | — |
 | 4 | Quality-gates wiring | Lock the floor: e2e in CI, secret scan in CI, post-deploy smoke checklist | cross-cutting, #7 | gates, manual smoke script | not started | — |
@@ -157,8 +157,37 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.2 Adding an integration test (DB/API, two-account isolation)
 
-- TBD — see §3 Phase 1 for the cross-account access-denial pattern and
-  the per-table ACL assertion.
+- **Location**: `src/tests/integration/*.test.ts` — a separate Vitest
+  project (`vitest.integration.config.ts`); excluded from `npm test` and
+  from lefthook's `vitest related`, sequential files
+  (`fileParallelism: false`, one shared local DB).
+- **Run locally**: `npx supabase start` once, then
+  `npm run test:integration`. NOT in CI (deliberate, §5): mandatory ad
+  hoc gate before merging any migration or API-route change.
+- **Mocking policy**: **we do not mock the database for RLS** — a mocked
+  client proves nothing about isolation. Tests hit PostgREST
+  (`http://127.0.0.1:54321`) with real sessions; that is the same
+  enforcement path the app uses (the service layer never touches
+  `user_id`).
+- **Helpers** (`src/tests/integration/helpers.ts`): `createTestUser()`
+  (real signup, `tst-…@example.com`, live session — confirmations are off
+  locally), `createAnonClient()`, `cleanupTestUsers()` (service-role
+  `auth.admin.deleteUser`; FK cascade removes rows — call in `afterAll`),
+  `sql()` (psql, for SQL-level oracles), `validSubscription(overrides)`.
+- **Oracles, not statuses**: cross-account denial is proven by a 0-rows
+  result PLUS a re-read as the owner showing data unchanged; anon denial
+  by Postgres `42501` (privilege layer, not an empty list); forged
+  `user_id` by `42501` (policy WITH CHECK); CHECK violations by `23514`
+  naming the constraint; ACL by the `has_table_privilege` matrix
+  (`table-acl.test.ts` — the lessons.md TRUNCATE regression, extend it
+  for every new table).
+- **Reference tests**: `rls-isolation.test.ts` (two accounts + anon +
+  forgery), `table-acl.test.ts` (ACL matrix + `relrowsecurity`),
+  `injection-parity.test.ts` (DB CHECKs without zod), `preflight.test.ts`
+  (stack diagnostics).
+- **Trust check**: the suite was verified to fail under a deliberately
+  weakened policy (see the change folder's plan Progress) — if you touch
+  policies, re-run that manual break gate.
 
 ### 6.3 Adding an e2e test
 
@@ -169,8 +198,15 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.4 Adding a test for a new API endpoint
 
-- TBD — see §3 Phase 1 for the request → response + side-effect pattern
-  and §3 Phase 3 for the induced-failure error-contract pattern.
+- **Data-layer risks first** (isolation, constraints): test them at
+  PostgREST per §6.2 — an endpoint adds nothing to what RLS enforces, so
+  don't spin up the Astro server to prove database facts.
+- Every new table an endpoint touches gets: a two-account isolation
+  probe + an ACL-matrix assertion (extend `table-acl.test.ts`) + parity
+  probes for its CHECK constraints.
+- **Route-level contracts** (status codes, error bodies, induced
+  failures): TBD — §3 Phase 3 defines the induced-failure error-contract
+  pattern with the swallowed-error fix.
 
 ### 6.5 Per-rollout-phase notes
 

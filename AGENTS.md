@@ -17,6 +17,14 @@ SubTrack — a subscription cost & renewal tracker (product scope: @context/foun
 - `npx supabase start` — local Supabase (requires Docker); `npx wrangler deploy` — deploy
 - Node 22.14.0 (@.nvmrc). Pre-commit: lefthook (@lefthook.yml — `eslint --fix` + `vitest related` on staged files). CI (@.github/workflows/ci.yml) runs `astro sync` + lint + test + build on push/PR to `main`; build needs `SUPABASE_URL`/`SUPABASE_KEY` repo secrets.
 
+## How we test
+
+Full strategy, risk map, and cookbook: @context/foundation/test-plan.md — read it before writing any new test.
+
+- **Unit** (`npm test`, ~71 tests): pure logic and zod schemas, colocated as `src/lib/**/*.test.ts`. Runs in CI and via lefthook's `vitest related` pre-commit. Oracles are hand-derived from the PRD, never from the implementation.
+- **Integration** (`npm run test:integration`, `src/tests/integration/`, own config @vitest.integration.config.ts): RLS isolation, table ACL, and DB-constraint parity against the REAL local Supabase stack (`npx supabase start` first). We never mock the database for RLS. Deliberately NOT in CI (Docker dependency) — it is the mandatory local gate before merging any migration or API-route change, and every new table needs its isolation + ACL + CHECK-parity probes (test-plan §6.2/§6.4).
+- **E2E / secret scan**: not built yet — test-plan §3 Phases 2–4.
+
 ## Structure & conventions
 
 - Path alias `@/*` → `./src/*` (@tsconfig.json).
