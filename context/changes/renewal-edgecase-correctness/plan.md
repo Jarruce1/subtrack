@@ -275,10 +275,10 @@ None — no schema, data, or runtime behavior changes. The only shared-surface e
 
 #### Automated
 
-- [x] 3.1 `npm test` exits 0 with both suites (examples + properties) passing
-- [x] 3.2 Total `npm test` wall time under ~10 s locally
-- [x] 3.3 `npm run lint` exits 0
+- [x] 3.1 `npm test` exits 0 with both suites (examples + properties) passing — e8033d7
+- [x] 3.2 Total `npm test` wall time under ~10 s locally — e8033d7
+- [x] 3.3 `npm run lint` exits 0 — e8033d7
 
 #### Manual
 
-- [x] 3.4 Harness sanity spot-check: temporarily invert the clamp (`Math.min` → `Math.max` in `occurrenceAtMonths`, `src/lib/billing.ts:164`), run `npm test`, confirm multiple example and property failures, then revert the mutation _(performed 2026-08-08: mutation produced 14 failures — 9 example + 5 property; reverted, `git diff` clean, suite green again)_
+- [x] 3.4 Harness sanity spot-check: temporarily invert the clamp (`Math.min` → `Math.max` in `occurrenceAtMonths`, `src/lib/billing.ts:164`), run `npm test`, confirm multiple example and property failures, then revert the mutation _(performed 2026-08-08: mutation produced 14 failures — 9 example + 5 property; reverted, `git diff` clean, suite green again)_ — e8033d7
