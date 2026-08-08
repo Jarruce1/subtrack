@@ -3,7 +3,7 @@
 // cites its source so a failure reads as a spec violation. The generated-input
 // safety net lives in billing.properties.test.ts.
 import { describe, expect, it } from "vitest";
-import { nextRenewalDate, normalizeCost, summarizeActive, upcomingRenewals } from "@/lib/billing";
+import { nextRenewalDate, normalizeCost, summarizeActive, summarizeByCategory, upcomingRenewals } from "@/lib/billing";
 import type { Subscription } from "@/types";
 
 let fixtureCount = 0;
@@ -226,6 +226,115 @@ describe("summarizeActive (Business Logic §3)", () => {
   it("custom-cycle subscription contributes amount / N to the monthly total", () => {
     const totals = summarizeActive([sub({ amount: 90, billing_cycle: "custom", billing_interval_months: 18 })]);
     expect(totals).toEqual([{ currency: "PLN", monthly: 90 / 18, yearly: (90 * 12) / 18 }]);
+  });
+});
+
+describe("summarizeByCategory (Business Logic §3 / FR-012)", () => {
+  it("empty input → []", () => {
+    expect(summarizeByCategory([])).toEqual([]);
+  });
+
+  it("excludes paused and cancelled within a category (§3 active-only rule, same as summarizeActive)", () => {
+    const rows = summarizeByCategory([
+      sub({ amount: 43, category: "Streaming", status: "active" }),
+      sub({ amount: 99, category: "Streaming", status: "paused" }),
+      sub({ amount: 77, category: "Streaming", status: "cancelled" }),
+    ]);
+    expect(rows).toEqual([{ category: "Streaming", currency: "PLN", monthly: 43, yearly: 43 * 12 }]);
+  });
+
+  it("a category whose subscriptions are all paused/cancelled is absent; all-inactive input → []", () => {
+    expect(
+      summarizeByCategory([
+        sub({ category: "Health & Fitness", status: "paused" }),
+        sub({ category: "News & Media", status: "cancelled" }),
+      ]),
+    ).toEqual([]);
+    const rows = summarizeByCategory([
+      sub({ amount: 43, category: "Streaming", status: "active" }),
+      sub({ amount: 120, category: "Health & Fitness", status: "cancelled" }),
+    ]);
+    expect(rows).toEqual([{ category: "Streaming", currency: "PLN", monthly: 43, yearly: 43 * 12 }]);
+  });
+
+  it("two currencies in one category are two rows — never merged or converted", () => {
+    const rows = summarizeByCategory([
+      sub({ amount: 20, category: "Software", currency: "PLN" }),
+      sub({ amount: 12, category: "Software", currency: "USD" }),
+      sub({ amount: 5, category: "Software", currency: "PLN" }),
+    ]);
+    expect(rows).toEqual([
+      { category: "Software", currency: "PLN", monthly: 20 + 5, yearly: (20 + 5) * 12 },
+      { category: "Software", currency: "USD", monthly: 12, yearly: 12 * 12 },
+    ]);
+  });
+
+  it("sums are unrounded sums of normalized values within a category (weekly + yearly + custom mix)", () => {
+    const rows = summarizeByCategory([
+      sub({ amount: 43, category: "Streaming", billing_cycle: "weekly" }),
+      sub({ amount: 516, category: "Streaming", billing_cycle: "yearly" }),
+      sub({ amount: 90, category: "Streaming", billing_cycle: "custom", billing_interval_months: 18 }),
+    ]);
+    expect(rows).toEqual([
+      {
+        category: "Streaming",
+        currency: "PLN",
+        monthly: (43 * 52) / 12 + 516 / 12 + 90 / 18,
+        yearly: 43 * 52 + 516 + (90 * 12) / 18,
+      },
+    ]);
+  });
+
+  it("rows are sorted by category, then currency", () => {
+    const rows = summarizeByCategory([
+      sub({ amount: 12, category: "Software", currency: "USD" }),
+      sub({ amount: 43, category: "Streaming", currency: "PLN" }),
+      sub({ amount: 10, category: "Other", currency: "PLN" }),
+      sub({ amount: 20, category: "Software", currency: "PLN" }),
+      sub({ amount: 8, category: "News & Media", currency: "EUR" }),
+      sub({ amount: 120, category: "Health & Fitness", currency: "PLN" }),
+    ]);
+    expect(rows.map((row) => [row.category, row.currency])).toEqual([
+      ["Health & Fitness", "PLN"],
+      ["News & Media", "EUR"],
+      ["Other", "PLN"],
+      ["Software", "PLN"],
+      ["Software", "USD"],
+      ["Streaming", "PLN"],
+    ]);
+  });
+
+  it("consistency (test-plan risk #1): per-currency sums across categories equal summarizeActive", () => {
+    // Mixed fixture: 4 categories, 3 currencies, paused + cancelled rows,
+    // all four cycles. The two sides may accumulate floats in different
+    // orders, so fields compare via toBeCloseTo(…, 10); exact display
+    // equality holds regardless because rounding happens only in formatMoney.
+    const subscriptions = [
+      sub({ amount: 43, category: "Streaming", currency: "PLN", billing_cycle: "monthly" }),
+      sub({ amount: 19, category: "Streaming", currency: "USD", billing_cycle: "weekly" }),
+      sub({ amount: 516, category: "Software", currency: "PLN", billing_cycle: "yearly" }),
+      sub({ amount: 90, category: "Software", currency: "EUR", billing_cycle: "custom", billing_interval_months: 3 }),
+      sub({ amount: 12, category: "Software", currency: "USD", billing_cycle: "monthly" }),
+      sub({ amount: 120, category: "Health & Fitness", currency: "PLN", billing_cycle: "monthly" }),
+      sub({ amount: 99, category: "Health & Fitness", currency: "PLN", status: "paused" }),
+      sub({ amount: 30, category: "Other", currency: "EUR", billing_cycle: "custom", billing_interval_months: 18 }),
+      sub({ amount: 77, category: "Other", currency: "USD", status: "cancelled" }),
+    ];
+    const overall = summarizeActive(subscriptions);
+    const summed = new Map<string, { monthly: number; yearly: number }>();
+    for (const row of summarizeByCategory(subscriptions)) {
+      const acc = summed.get(row.currency) ?? { monthly: 0, yearly: 0 };
+      acc.monthly += row.monthly;
+      acc.yearly += row.yearly;
+      summed.set(row.currency, acc);
+    }
+    expect([...summed.keys()].sort((a, b) => a.localeCompare(b))).toEqual(overall.map((total) => total.currency));
+    for (const total of overall) {
+      const acc = summed.get(total.currency);
+      expect(acc).toBeDefined();
+      expect(acc?.monthly).toBeCloseTo(total.monthly, 10);
+      expect(acc?.yearly).toBeCloseTo(total.yearly, 10);
+    }
   });
 });
 
