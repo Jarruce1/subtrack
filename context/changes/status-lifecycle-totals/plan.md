@@ -32,8 +32,11 @@ consistently across the dashboard, category, and renewals views.
   the item route, `window.location` full navigation on success, 401 → signin,
   404 → reload (stale row), inline `role="alert"` error, disabled-while-pending.
 - **Auth/CSRF**: middleware sets `locals.user`; the API route answers its own
-  401. Astro's server-output origin check applies to PATCH — same-origin fetch
-  from the island satisfies it; curl smoke must send an `Origin` header.
+  401. Astro's `security.checkOrigin` gates only form-like content types; the
+  island's JSON PATCH is protected by the browser CORS preflight plus
+  `SameSite=Lax` session cookies. (Corrected per impl-review F1 — the original
+  wording overstated checkOrigin's reach; smoke confirmed JSON needs no
+  `Origin` header server-side.)
 
 ## Desired End State
 
