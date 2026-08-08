@@ -282,15 +282,17 @@ Behavioral invariants:
 
 #### Automated
 
-- [ ] 1.1 Migration applies from zero: `npx supabase db reset` completes without error
+- [x] 1.1 Migration applies from zero: `npx supabase db reset` completes without error
 
 #### Manual
 
-- [ ] 1.2 Isolation: user A's rows invisible and unmodifiable for user B (select 0, update/delete affect 0)
-- [ ] 1.3 Anti-forgery: insert/update with another user's `user_id` rejected by policy `WITH CHECK`
-- [ ] 1.4 Anon deny: `anon` role selects 0 rows and cannot insert
-- [ ] 1.5 Constraints: non-positive amount, empty name, bad currency, custom/interval mismatch, out-of-enum values all rejected
-- [ ] 1.6 Trigger: `updated_at` bumps on update
+- [x] 1.2 Isolation: user A's rows invisible and unmodifiable for user B (select 0, update/delete affect 0)
+- [x] 1.3 Anti-forgery: insert/update with another user's `user_id` rejected by policy `WITH CHECK`
+- [x] 1.4 Anon deny: `anon` role selects 0 rows and cannot insert
+- [x] 1.5 Constraints: non-positive amount, empty name, bad currency, custom/interval mismatch, out-of-enum values all rejected
+- [x] 1.6 Trigger: `updated_at` bumps on update
+
+> Phase 1 verification notes (run autonomously via psql against the local stack, two signup-created users): 1.2 — B `count(*)` = 0, `UPDATE 0`, `DELETE 0` against A's row; 1.3 — both forgeries fail with `new row violates row-level security policy`; 1.4 — anon select AND insert fail with `permission denied` (stronger than the planned "0 rows": the Supabase postgres 17 image grants API roles no DML by default, so the migration adds an explicit DML grant to `authenticated` only — anon is denied at the privilege layer on top of having no RLS policy; end state "anon can read or write nothing" holds); 1.5 — six rejections via `subscriptions_amount_check`, `subscriptions_name_check`, `subscriptions_currency_check`, `subscriptions_cycle_interval_check` (×2), enum error for `Gaming`; 1.6 — `updated_at > created_at` after update (`t`). Sanity: valid `custom` + interval insert accepted.
 
 ### Phase 2: Typed client and domain types
 
