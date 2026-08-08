@@ -1,7 +1,7 @@
 ---
 change_id: error-path-hardening
 title: Error-path & secret hardening — honest failure contracts and a secret-leak scan
-status: plan_reviewed
+status: implemented
 created: 2026-08-09
 updated: 2026-08-09
 archived_at: null

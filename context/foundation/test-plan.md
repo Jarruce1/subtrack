@@ -82,7 +82,7 @@ orchestrator updates Status as artifacts appear on disk.
 |---|------------|-----------------|----------------|------------|--------|----------------|
 | 1 | API & RLS integration | Prove two-account isolation and honest API error/validation contracts on a real local database | #2, #5 (#3 → Phase 3) | integration (local Supabase), SQL ACL assertions | done | `context/changes/testing-api-rls-integration/` |
 | 2 | E2E critical flow | Prove signup → add → dashboard works in a real browser and shows hand-verifiable numbers | #4, #1 | e2e (Playwright) | done | `context/changes/e2e-critical-flow/` |
-| 3 | Error-path & secret hardening | Pin the swallowed-error fix with failing-first tests and make secret leakage mechanically checkable | #3, #6 | integration (induced failures), build-output scan | not started | — |
+| 3 | Error-path & secret hardening | Pin the swallowed-error fix with failing-first tests and make secret leakage mechanically checkable | #3, #6 | integration (induced failures), build-output scan | done | `context/changes/error-path-hardening/` |
 | 4 | Quality-gates wiring | Lock the floor: e2e in CI, secret scan in CI, post-deploy smoke checklist | cross-cutting, #7 | gates, manual smoke script | not started | — |
 
 Phase 3 is intentionally sequenced to land with (or immediately after) the
@@ -99,7 +99,7 @@ combined risk and cheaper to test than browser flows.
 | validation schemas | zod | 4.4 | Schemas already unit-tested; Phase 1 extends with abuse payloads |
 | integration (DB/API) | supabase CLI + Docker (local stack) | 2.23 | none yet — see Phase 1; real Postgres + RLS, two seeded users via local auth API (pattern proven manually in the F-01 archive) |
 | e2e | Playwright (Chromium) | 1.62 | Exists: 4 tests + auth setup in `e2e/` (`npm run test:e2e`, local stack required — see §6.3); generation governed by the `/10x-e2e` skill (CLAUDE.md): role-based locators, no `waitForTimeout`, independent tests with unique ids, `seed.spec.ts` exemplar |
-| secret scan | deterministic grep over build output | n/a | none yet — see Phase 3; no AI needed for an exact-string check |
+| secret scan | deterministic grep over build output | n/a | Exists: `npm run scan:secrets` (build + `scripts/scan-secrets.mjs` over `dist/client/**`; exit 2 on hit, needle names only — never values); CI wiring = Phase 4 |
 | (optional) AI-native | `/10x-e2e` review loop; vision caps only for visual-only risks — checked: 2026-08-08 | n/a | DOM snapshot is the default; do not use vision where a deterministic assertion exists |
 
 **Stack grounding tools (current session):**
@@ -239,14 +239,40 @@ the relevant rollout phase ships; before that, the sub-section reads
   probe + an ACL-matrix assertion (extend `table-acl.test.ts`) + parity
   probes for its CHECK constraints.
 - **Route-level contracts** (status codes, error bodies, induced
-  failures): TBD — §3 Phase 3 defines the induced-failure error-contract
-  pattern with the swallowed-error fix.
+  failures): pin them with the induced-failure pattern from
+  `src/tests/integration/error-contracts.test.ts` (§3 Phase 3). Astro API
+  routes are plain functions of `APIContext` — import the handler and
+  invoke it with a minimal context stand-in. Every route reaches Supabase
+  through the single `@/lib/supabase` seam, so `vi.mock("@/lib/supabase")`
+  plus a chainable/thenable stub (any `await` on the builder resolves to
+  `{ data: null, error }`) induces a deterministic backend failure without
+  touching the real stack. **Mocking carve-out**: §6.2's no-mocks rule is
+  scoped to proving RLS; these tests target the routes' error-translation
+  layer, where a real database cannot be made to fail on demand — the two
+  policies are complementary, not contradictory. Oracles to pin for every
+  new endpoint: induced failure → non-2xx with a usable `{ error }` body
+  that carries no backend detail (risk #6); the 401 `{ error }` shape; the
+  PGRST116 → 404 mapping where `.single()` no-rows means not-found; for
+  form-post routes, failure → redirect with `?error=` (never a fake
+  success redirect).
 
 ### 6.5 Per-rollout-phase notes
 
 (Filled by each phase's final sub-phase with anything surprising the
 phase taught.)
 
+- **Phase 3 (`error-path-hardening`)**: the audit found the JSON API
+  already honest — the one real swallow was auth-shaped:
+  `await supabase.auth.signOut();` discarded `{ error }`, and supabase-js
+  keeps the session cookie alive on network/5xx logout failures, so "/"
+  faked a signed-out state (failing-first tests proved it red before the
+  fix). Route handlers are directly invokable under Vitest because every
+  `astro` import in `src/pages/api/**` is type-only — one mocked seam
+  (`@/lib/supabase`) suffices. The scanner's break-gate matters as much as
+  the scan: a planted key value, an `sb_secret_` literal, and a
+  service-role JWT each had to exit 2 before the clean run counted
+  (risk #6 anti-pattern: a check that never fires). `service_role` inside
+  a JWT is base64url-encoded — a plain grep misses it; decode the payload.
 - **Phase 2 (`e2e-critical-flow`)**: Playwright 1.62 starts `webServer:`
   BEFORE `globalSetup` (verified in the runner source) — an env-file swap
   must own the dev-server lifecycle inside globalSetup itself. Astro's

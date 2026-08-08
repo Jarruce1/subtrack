@@ -12,6 +12,13 @@ Entry format — copy for each new lesson:
 No entries yet.
 -->
 
+## supabase-js auth calls return `{ error }` — an un-destructured await is a swallowed failure
+
+**Context**: Phase 3 error-path hardening — `src/pages/api/auth/signout.ts` (`await supabase.auth.signOut();` then unconditional `redirect("/")`); found by the swallowed-error audit, pinned red by `src/tests/integration/error-contracts.test.ts` before the fix.
+**Problem**: Every supabase-js call (auth AND PostgREST) resolves — never throws — and reports failure only through the returned `{ error }`. Awaiting without destructuring compiles, lints, and looks done, but drops the failure: here a network/5xx logout failure leaves the session cookie alive (supabase-js returns early without clearing it) while the user sees the signed-out landing page — a fake success on a live credential.
+**Rule**: Never discard a supabase-js result object: destructure `{ error }` (or `{ data, error }`) and propagate a non-success response on error. Verify with `grep -rn "await supabase\." src/ | grep -v "= await"` — any bare `await supabase.…` call is a finding. When the failure surfaces in a redirect URL, use a fixed generic message, never `error.message` (no backend detail in URLs — risk #6).
+**Applies to**: implement | impl-review
+
 ## Workers assets `not_found_handling` swallows SSR routes
 
 **Context**: First production deploy of the Astro SSR app to Cloudflare Workers with static assets.

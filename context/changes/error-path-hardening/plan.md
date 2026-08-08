@@ -383,6 +383,28 @@ None — no schema, no data, no deploy-surface changes.
   `src/lib/services/subscriptions.ts:16-78`
 - Redirect-with-error exemplar: `src/pages/api/auth/signin.ts:15-17`
 
+## Verification Evidence
+
+(Kept out of `## Progress` — that section is a mechanical contract,
+headings + bullets only.)
+
+- **Phase 1 failing-first (before p2)**: `Tests 2 failed | 32 passed (34)` —
+  `× surfaces a failed sign-out instead of faking success`
+  (`AssertionError: expected '/' not to be '/'`) and
+  `× carries a fixed generic message in the failure redirect`
+  (`Expected: "/dashboard?error=Sign%20out%20failed.…" / Received: "/"`).
+  Every non-sign-out assertion (500 `{error}` / 401 shape / PGRST116 404)
+  was green from the start — mirror-confirms the audit's "JSON API already
+  honest" claim.
+- **Phase 2 mirror (after fix)**: `Tests 34 passed (34)`; grep shows the
+  only `signOut` call now destructures `{ error }` and branches on it.
+- **Phase 3 break-gate**: planted the real `SUPABASE_KEY` value + an
+  `sb_secret_…` literal → exit 2 (`dist/client/canary.js: SUPABASE_KEY
+  value (.env)` / `(.dev.vars)` / `sb_secret_… key pattern`); planted the
+  local service-role JWT → exit 2 (`JWT with service_role payload`);
+  removed → exit 0 (`15 client files scanned, 0 hits, 4 secret value(s) +
+  3 patterns checked`). No secret value appeared in any scanner output.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.
@@ -391,36 +413,36 @@ None — no schema, no data, no deploy-surface changes.
 
 #### Automated
 
-- [ ] 1.1 `npm run test:integration` shows the new suite with exactly the two sign-out failure-contract assertions failing and every other new assertion passing
-- [ ] 1.2 `npm test` (unit, 99) untouched and green
-- [ ] 1.3 `npm run lint` green
+- [x] 1.1 `npm run test:integration` shows the new suite with exactly the two sign-out failure-contract assertions failing and every other new assertion passing — f765c1e
+- [x] 1.2 `npm test` (unit, 99) untouched and green — f765c1e
+- [x] 1.3 `npm run lint` green — f765c1e
 
 #### Manual
 
-- [ ] 1.4 Red output pasted/summarized into the Progress note as failing-first evidence
+- [x] 1.4 Red output pasted/summarized into the Progress note as failing-first evidence — f765c1e
 
 ### Phase 2: Propagate the sign-out failure
 
 #### Automated
 
-- [ ] 2.1 `npm run test:integration` fully green (26+ tests incl. new suite)
-- [ ] 2.2 `npm run lint`, `npx astro check`, `npm run build`, `npm test` green
+- [x] 2.1 `npm run test:integration` fully green (26+ tests incl. new suite) — 7c06178
+- [x] 2.2 `npm run lint`, `npx astro check`, `npm run build`, `npm test` green — 7c06178
 
 #### Manual
 
-- [ ] 2.3 Mirror check: grep confirms no unhandled `signOut()` remains; sign-out tests rerun green
+- [x] 2.3 Mirror check: grep confirms no unhandled `signOut()` remains; sign-out tests rerun green — 7c06178
 
 ### Phase 3: Secret-leak scan of the client bundle
 
 #### Automated
 
-- [ ] 3.1 `npm run scan:secrets` exits 0 on the real build
-- [ ] 3.2 Canary break-gate: planted secret → exit 2 naming the file; removed → exit 0
-- [ ] 3.3 `npm run lint` green
+- [x] 3.1 `npm run scan:secrets` exits 0 on the real build — ac1080d
+- [x] 3.2 Canary break-gate: planted secret → exit 2 naming the file; removed → exit 0 — ac1080d
+- [x] 3.3 `npm run lint` green — ac1080d
 
 #### Manual
 
-- [ ] 3.4 Scanner hit output shows needle name, not the secret value
+- [x] 3.4 Scanner hit output shows needle name, not the secret value — ac1080d
 
 ### Phase 4: Docs, ledger, and mirror verification
 
