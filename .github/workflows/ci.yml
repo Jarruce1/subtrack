@@ -23,3 +23,41 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      # Secret-leak scan over the build output above (test-plan §5 gate);
+      # scan:secrets:dist skips the rebuild the local `scan:secrets` does.
+      # Same env on purpose: the scanner greps dist/client for the real
+      # secret VALUES, not just secret-shaped patterns.
+      - run: npm run scan:secrets:dist
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+  # E2E against a real local Supabase stack (test-plan §5 gate; wiring = §3
+  # Phase 4). Runs in parallel with `ci` (no `needs`): solo project with low
+  # PR volume — faster feedback beats the marginal runner cost of the rare
+  # run where `ci` would have failed first.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # npx resolves the repo-pinned supabase CLI (devDependency), so the
+      # stack mints the same demo anon JWT that e2e/support/env.ts hardcodes.
+      # Migrations under supabase/migrations/ apply during start.
+      - run: npx supabase start
+      # Point the env files at the CI-local stack. e2e global-setup would
+      # write local values anyway (it backs up + swaps + restores and handles
+      # absent files), but creating them from `supabase status` documents the
+      # contract and fails fast if the stack minted no anon key.
+      - name: Create .env/.dev.vars for the local stack
+        run: |
+          ANON_KEY="$(npx supabase status --output json | sed -n 's/.*"ANON_KEY":"\([^"]*\)".*/\1/p')"
+          test -n "$ANON_KEY"
+          printf 'SUPABASE_URL=http://127.0.0.1:54321\nSUPABASE_KEY=%s\n' "$ANON_KEY" | tee .env .dev.vars > /dev/null
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
