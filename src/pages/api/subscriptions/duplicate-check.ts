@@ -21,7 +21,9 @@ function json(body: unknown, status: number): Response {
   });
 }
 
-const nameParamSchema = z.string().min(1);
+// max(120) mirrors the create schema's name cap — longer values cannot name a
+// stored subscription, so answering 400 keeps the two surfaces symmetric.
+const nameParamSchema = z.string().min(1).max(120);
 const excludeParamSchema = z.uuid();
 
 export const GET: APIRoute = async (context) => {

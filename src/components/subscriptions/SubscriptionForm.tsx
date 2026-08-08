@@ -101,7 +101,11 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
       if (subscription) {
         query.set("exclude", subscription.id);
       }
-      const response = await fetch(`/api/subscriptions/duplicate-check?${query.toString()}`);
+      // Bounded wait: a hung advisory check must not hold the save hostage —
+      // the abort lands in the catch below and resolves fail-open.
+      const response = await fetch(`/api/subscriptions/duplicate-check?${query.toString()}`, {
+        signal: AbortSignal.timeout(2000),
+      });
       if (response.status !== 200) {
         return null;
       }
@@ -114,6 +118,9 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting) {
+      return; // belt-and-braces double-submit guard alongside the disabled button
+    }
     setFormErrors([]);
 
     const parsed = subscriptionCreateSchema.safeParse(buildPayload());
