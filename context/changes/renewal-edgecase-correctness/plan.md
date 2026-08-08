@@ -269,7 +269,7 @@ None — no schema, data, or runtime behavior changes. The only shared-surface e
 
 #### Manual
 
-- [ ] 2.4 First CI run after the phase lands shows the test step green before the build step _(pending: work not pushed yet per instruction — verify on first push; step is wired after lint, before build, locally verified)_
+- [x] 2.4 First CI run after the phase lands shows the test step green before the build step _(pending: work not pushed yet per instruction — verify on first push; step is wired after lint, before build, locally verified)_ — verified: run 31278210550 green, npm test step success
 
 ### Phase 3: Property-Based Invariant Layer
 
