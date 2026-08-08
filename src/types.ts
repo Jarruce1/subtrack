@@ -15,3 +15,15 @@ export type SubscriptionCategory = Database["public"]["Enums"]["subscription_cat
 // fills id/user_id/timestamps (user_id via its auth.uid() default under RLS).
 export type CreateSubscriptionInput = Omit<SubscriptionInsert, "id" | "user_id" | "created_at" | "updated_at">;
 export type UpdateSubscriptionInput = Omit<SubscriptionUpdate, "id" | "user_id" | "created_at" | "updated_at">;
+
+// Computed billing results (src/lib/billing.ts) — shared by the dashboard
+// (S-01), lifecycle totals (S-04), and category breakdown (S-06).
+export interface NormalizedCost {
+  monthly: number; // unrounded
+  yearly: number; // unrounded
+}
+export interface CurrencyTotal {
+  currency: string;
+  monthly: number;
+  yearly: number;
+}

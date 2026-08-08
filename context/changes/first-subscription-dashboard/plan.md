@@ -361,17 +361,19 @@ Full US-01 flow against `npm run dev` + local Supabase, fresh user:
 
 #### Automated
 
-- [ ] 1.1 `npm run lint` passes (module compiles under `strictTypeChecked`)
-- [ ] 1.2 `npm run build` passes without a running database
+- [x] 1.1 `npm run lint` passes (module compiles under `strictTypeChecked`)
+- [x] 1.2 `npm run build` passes without a running database
 
 #### Manual
 
-- [ ] 1.3 US-01 example: 43 monthly → 43 / 516; 2026-07-15 → next 2026-08-15
-- [ ] 1.4 Weekly and custom-N normalization match Business Logic §1
-- [ ] 1.5 US-02 clamping: 2026-01-31 anchor → Feb 28, then Mar 31
-- [ ] 1.6 Leap year: 2024-02-29 anchor → 2027-02-28, 2028-02-29
-- [ ] 1.7 Boundaries: today == occurrence; future start date returns start date
-- [ ] 1.8 `summarizeActive`: non-active excluded; currencies never merged
+- [x] 1.3 US-01 example: 43 monthly → 43 / 516; 2026-07-15 → next 2026-08-15
+- [x] 1.4 Weekly and custom-N normalization match Business Logic §1
+- [x] 1.5 US-02 clamping: 2026-01-31 anchor → Feb 28, then Mar 31
+- [x] 1.6 Leap year: 2024-02-29 anchor → 2027-02-28, 2028-02-29
+- [x] 1.7 Boundaries: today == occurrence; future start date returns start date
+- [x] 1.8 `summarizeActive`: non-active excluded; currencies never merged
+
+> Phase 1 verification notes (run autonomously): 1.1/1.2 — lint exit 0, build exit 0, plus `npx astro check` 0 errors. 1.3–1.8 — 20-assertion scratch script (`npx tsx`, not committed) over the PRD worked examples, all pass: 43 monthly → {43, 516}, start 2026-07-15 + today 2026-08-08 → 2026-08-15; weekly 12 → {52, 624}, custom-3 30 → {10, 120}; anchor 2026-01-31 → 2026-02-28 (today 2026-02-10) then 2026-03-31 (today 2026-03-01, anchor preserved); yearly anchor 2024-02-29 → 2027-02-28 then 2028-02-29; today == occurrence returns that date (monthly and weekly), future start returns itself, today == start returns start; custom-3 anchored clamping (2026-01-31 → 2026-04-30 → 2026-07-31); `summarizeActive` excludes paused/cancelled, keeps PLN/EUR as separate sorted rows, sums unrounded, `[]` on empty; `custom` with null interval throws (defensive).
 
 ### Phase 2: Validation schemas and create endpoint
 

@@ -32,7 +32,7 @@ People with 5–30 subscriptions have charges scattered across statements and in
 | ID   | Change ID                   | Outcome (user can …)                                                              | Prerequisites | PRD refs                                                    | Status   |
 | ---- | --------------------------- | --------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------- | -------- |
 | F-01 | private-subscription-store  | (foundation) per-user subscription storage with enforced account isolation         | —             | FR-004, Access Control, NFR (privacy)                       | done |
-| S-01 | first-subscription-dashboard | register, add first subscription, see dashboard with normalized cost + next renewal | F-01          | US-01, FR-001, FR-002, FR-003, FR-004, FR-009, FR-010, FR-011 | planning |
+| S-01 | first-subscription-dashboard | register, add first subscription, see dashboard with normalized cost + next renewal | F-01          | US-01, FR-001, FR-002, FR-003, FR-004, FR-009, FR-010, FR-011 | in-progress |
 | S-02 | renewal-edgecase-correctness | trust renewal dates across month-end and leap-year cases                           | S-01          | US-02, FR-010, NFR (correctness)                            | proposed |
 | S-03 | manage-subscription-list    | view all subscriptions with status, edit any field, delete an entry                | S-01          | FR-005, FR-006, FR-007                                      | proposed |
 | S-04 | status-lifecycle-totals     | pause/cancel/reactivate and see totals + renewals reflect only active items        | S-03          | US-04, FR-008                                               | proposed |
@@ -91,7 +91,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The largest slice — it introduces the normalization and renewal arithmetic for the happy path; scope is held down by deferring month-end/leap-year hardening to S-02 and all list-management to S-03.
-- **Status:** planning
+- **Status:** in-progress
 
 ### S-02: Month-end and leap-year renewal correctness
 
