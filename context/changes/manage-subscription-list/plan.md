@@ -279,38 +279,40 @@ FR-006: generalize the add form into a dual-mode `SubscriptionForm`, host it on 
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npx astro check` passes
-- [x] 2.3 `npm run build` passes
-- [x] 2.4 `npm test` passes
+- [x] 2.1 `npm run lint` passes — 679e0ab
+- [x] 2.2 `npx astro check` passes — 679e0ab
+- [x] 2.3 `npm run build` passes — 679e0ab
+- [x] 2.4 `npm test` passes — 679e0ab
 
 #### Manual
 
-- [x] 2.5 Unauthenticated `/subscriptions` → redirect to signin
-- [x] 2.6 Mixed subscriptions render with status badge, raw + normalized costs matching dashboard
-- [x] 2.7 Zero subscriptions → explanatory empty state
-- [x] 2.8 Delete: cancel keeps row (no request); confirm removes row; totals updated
-- [x] 2.9 Dashboard Manage link works; dashboard.astro diff is one added line
-- [x] 2.10 Edit links point at `/subscriptions/<id>/edit` (page arrives in Phase 3 — transiently 404s; acceptable mid-change)
+- [x] 2.5 Unauthenticated `/subscriptions` → redirect to signin — 679e0ab
+- [x] 2.6 Mixed subscriptions render with status badge, raw + normalized costs matching dashboard — 679e0ab
+- [x] 2.7 Zero subscriptions → explanatory empty state — 679e0ab
+- [x] 2.8 Delete: cancel keeps row (no request); confirm removes row; totals updated — 679e0ab
+- [x] 2.9 Dashboard Manage link works; dashboard.astro diff is one added line — 679e0ab
+- [x] 2.10 Edit links point at `/subscriptions/<id>/edit` (page arrives in Phase 3 — transiently 404s; acceptable mid-change) — 679e0ab
 
 > Phase 2 verification notes (run autonomously): lint/astro check (0 errors)/build/test all exit 0 (61 tests). Smoke on local stack (dev server port 4401, `.env`/`.dev.vars` temporarily pointed at local Supabase, restored after the run): unauth `/subscriptions` 302 → signin; user with active/paused/cancelled × PLN/EUR × monthly/yearly/custom-3 rows — all names, status badges, "every 3 months" label, raw + normalized costs (43.00/516.00 PLN; €120 yearly → €10.00 monthly) rendered; fresh user sees the empty state; DELETE flow: 204, fresh SSR render drops the row, dashboard totals lose the deleted active sub's amount; dashboard has exactly one `href="/subscriptions"` Manage link. `git diff --numstat dashboard.astro` = 3 added / 0 deleted — prettier's Astro parser force-wraps the anchor to 3 physical lines (single added element, still purely additive; the plan's "one added line" is satisfied in spirit, enforced by eslint-plugin-prettier). The confirm-dialog cancel path (`window.confirm` returning false → early return, no request) is client-side JS verified by code inspection — no headless browser dependency available in this worktree; browser-level interaction is E2E scope (module 3).
+
+> Phase 3 verification notes (run autonomously): lint/astro check (0 errors)/build/test all exit 0 (61 tests); prettier clean. Implementation deviation: the plan's `return new Response(..., 404)` in edit.astro frontmatter crashes astro-eslint-parser (`no-misused-promises`: "Expected node to have a parent" on a top-level return) — replaced with `Astro.response.status = 404` plus a rendered minimal not-found body (same status contract, small UX gain). Smoke on local stack: edit page SSR prefills every field via serialized island props (name, amount 30, custom cycle + interval 3, start 2026-01-31, category, paused status, note "family plan") with a "Save changes" label; full-field PATCH rename+amount → list reflects; cycle round-trip custom-3 → monthly (interval null) → custom-3, list label "every 3 months" correct; start-date edit 2026-07-15 → 2026-07-20 re-derived the dashboard next renewal 2026-08-15 → 2026-08-20 (3.7b, the roadmap's named risk); foreign/nonexistent/malformed edit URLs → 404, unauth → 302 signin; /subscriptions/new renders the shared form in add mode and POST 201 still works. 3.8 (client pre-validation blocks bad input with zero network calls) is client-side JS verified by code inspection — the safeParse-before-fetch wiring is byte-identical to the S-01 form whose behavior was browser-verified in S-01's phase 3; browser-level re-verification is E2E scope (module 3). Dev-only note: a stale vite optimized-deps cache after hot-reload made radix Select SSR throw ("null useMemo") mid-smoke — fixed by restarting `astro dev` with `node_modules/.vite` cleared; not reproducible in `npm run build`.
 
 ### Phase 3: Edit page with the generalized subscription form
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes
-- [ ] 3.2 `npx astro check` passes
-- [ ] 3.3 `npm run build` passes
-- [ ] 3.4 `npm test` passes
+- [x] 3.1 `npm run lint` passes
+- [x] 3.2 `npx astro check` passes
+- [x] 3.3 `npm run build` passes
+- [x] 3.4 `npm test` passes
 
 #### Manual
 
-- [ ] 3.5 Edit form prefilled with the row's values (incl. custom interval, note, status)
-- [ ] 3.6 Save name/amount change → list and dashboard reflect it
-- [ ] 3.7 Cycle round-trip: monthly → custom-3 → monthly (interval stored null)
-- [ ] 3.7b Start-date edit → dashboard next renewal re-derived from the new anchor
-- [ ] 3.8 Client validation blocks bad input in edit mode without a network call
-- [ ] 3.9 Foreign / nonexistent / malformed id → 404 for the edit page
-- [ ] 3.10 `/subscriptions/new` add flow regression passes
-- [ ] 3.11 Unauthenticated edit URL → redirect to signin
+- [x] 3.5 Edit form prefilled with the row's values (incl. custom interval, note, status)
+- [x] 3.6 Save name/amount change → list and dashboard reflect it
+- [x] 3.7 Cycle round-trip: monthly → custom-3 → monthly (interval stored null)
+- [x] 3.7b Start-date edit → dashboard next renewal re-derived from the new anchor
+- [x] 3.8 Client validation blocks bad input in edit mode without a network call
+- [x] 3.9 Foreign / nonexistent / malformed id → 404 for the edit page
+- [x] 3.10 `/subscriptions/new` add flow regression passes
+- [x] 3.11 Unauthenticated edit URL → redirect to signin

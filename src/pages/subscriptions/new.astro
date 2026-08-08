@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import AddSubscriptionForm from "@/components/subscriptions/AddSubscriptionForm";
+import SubscriptionForm from "@/components/subscriptions/SubscriptionForm";
 
 // Auth is enforced by middleware (PROTECTED_ROUTES prefix "/subscriptions").
 ---
@@ -15,7 +15,7 @@ import AddSubscriptionForm from "@/components/subscriptions/AddSubscriptionForm"
       >
         Add subscription
       </h1>
-      <AddSubscriptionForm client:load />
+      <SubscriptionForm client:load />
       <p class="mt-4 text-center text-sm">
         <a href="/dashboard" class="text-purple-300 hover:underline">&larr; Back to dashboard</a>
       </p>
