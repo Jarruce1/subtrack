@@ -96,8 +96,10 @@ describe("subscriptions RLS isolation (two real accounts + anon)", () => {
       .insert(validSubscription({ name: "forged owner", user_id: userB.userId }));
     expect(error?.code).toBe(INSUFFICIENT_PRIVILEGE);
 
-    // DB-level proof: nothing landed in B's account.
-    const asB = await userB.client.from("subscriptions").select("*");
+    // DB-level proof: the forged row landed nowhere B can see. Scoped to
+    // this probe's name so a future test legitimately inserting as B
+    // cannot turn this into a false red.
+    const asB = await userB.client.from("subscriptions").select("*").eq("name", "forged owner");
     expect(asB.data).toEqual([]);
   });
 

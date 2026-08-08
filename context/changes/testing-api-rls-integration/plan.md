@@ -328,3 +328,11 @@ the Phase 5 manual gate.
       user_id on insert" (its B-side verification also caught the leak).
       Restored with `npx supabase db reset` → 19/19 green again. The
       suite demonstrably fails when isolation is broken.
+
+### Post-review fixes (impl-review, 2026-08-09)
+
+- [x] 3 warnings + 5 observations fixed (see reviews/impl-review.md):
+      locality guard in getStack(), exec timeouts, 3 extra CHECK probes
+      (parity now covers all 5 constraints), scoped forgery re-read,
+      retryable teardown, comment corrections. Final totals: 22
+      integration + 71 unit, all gates green.

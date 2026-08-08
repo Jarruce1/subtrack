@@ -9,7 +9,7 @@ import { defineConfig } from "vitest/config";
 // test plan (§5) makes mandatory before merging migration/API changes.
 //
 // fileParallelism: false — suites share one local database; sequential
-// files remove cross-file interference at negligible cost (~16 tests).
+// files remove cross-file interference at negligible cost (small suite).
 
 process.env.TZ ??= "UTC";
 

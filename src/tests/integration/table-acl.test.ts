@@ -17,7 +17,12 @@ const ROLES = ["anon", "authenticated", "service_role"] as const;
 const DML = ["SELECT", "INSERT", "UPDATE", "DELETE"] as const;
 const RLS_EXEMPT = ["TRUNCATE", "REFERENCES", "TRIGGER", "MAINTAIN"] as const;
 
-/** One psql round-trip: `role:PRIVILEGE:true|false` lines for the whole matrix (boolean→text casts as "true"/"false"). */
+/**
+ * One psql round-trip: `role:PRIVILEGE:true|false` lines for the whole matrix
+ * (boolean→text casts as "true"/"false"). Invariant: the values interpolated
+ * into the SQL below MUST remain the compile-time literals above — never
+ * feed runtime data through this template (sql() takes a raw string).
+ */
 function privilegeMatrix(): Map<string, boolean> {
   const rolesList = ROLES.map((r) => `('${r}')`).join(",");
   const privsList = [...DML, ...RLS_EXEMPT].map((p) => `('${p}')`).join(",");

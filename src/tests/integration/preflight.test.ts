@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { getStack, sql } from "./helpers";
 
 // Stack preflight: every integration suite depends on these three facts.
-// When the gate is run with Docker/Supabase down, this file fails first
-// with an actionable message instead of a wall of network errors.
+// getStack() itself fails loudly (with a "start supabase" hint and a
+// locality guard) from whichever file happens to run first — Vitest does
+// not order files by name — so this file's job is to pin the stack
+// contract explicitly, not to be a gatekeeper.
 
 describe("local stack preflight", () => {
   it("supabase status yields the URLs and keys the suites need", () => {

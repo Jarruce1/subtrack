@@ -1,7 +1,7 @@
 ---
 change_id: testing-api-rls-integration
 title: Integration tests for RLS isolation, ACL regression, and injection parity
-status: implemented
+status: reviewed
 created: 2026-08-08
 updated: 2026-08-09
 archived_at: null

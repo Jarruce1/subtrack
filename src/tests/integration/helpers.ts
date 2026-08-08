@@ -29,6 +29,15 @@ export type TestClient = SupabaseClient<Database>;
 
 let cachedStack: LocalStack | null = null;
 
+const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
+
+function assertLocal(label: string, url: string): void {
+  const host = new URL(url).hostname;
+  if (!LOCAL_HOSTS.has(host)) {
+    throw new Error(`${label} points at "${host}" — integration tests only ever run against the local stack.`);
+  }
+}
+
 /** Discover local stack URLs/keys once per process; fail loudly when the stack is down. */
 export function getStack(): LocalStack {
   if (cachedStack) {
@@ -39,6 +48,9 @@ export function getStack(): LocalStack {
     raw = execFileSync("npx", ["supabase", "status", "-o", "json"], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
+      // Sync child processes block the worker, so Vitest's testTimeout
+      // cannot fire mid-call — the timeout must live on the call itself.
+      timeout: 15_000,
     });
   } catch (cause) {
     throw new Error(
@@ -55,6 +67,11 @@ export function getStack(): LocalStack {
       `supabase status is missing API_URL/DB_URL/ANON_KEY/SERVICE_ROLE_KEY — got keys: ${Object.keys(status).join(", ")}`,
     );
   }
+  // Hard locality guard: sql() runs as the postgres superuser and
+  // cleanupTestUsers() deletes auth users — refuse to aim either at
+  // anything but the local stack, whatever `supabase status` reports.
+  assertLocal("API_URL", API_URL);
+  assertLocal("DB_URL", DB_URL);
   cachedStack = { apiUrl: API_URL, dbUrl: DB_URL, anonKey: ANON_KEY, serviceRoleKey: SERVICE_ROLE_KEY };
   return cachedStack;
 }
@@ -65,6 +82,8 @@ export function sql(query: string): string {
   return execFileSync("psql", [dbUrl, "-v", "ON_ERROR_STOP=1", "-tA", "-c", query], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    timeout: 10_000,
+    env: { ...process.env, PGCONNECT_TIMEOUT: "5" },
   }).trim();
 }
 
@@ -123,14 +142,14 @@ export async function createTestUser(): Promise<TestUser> {
 export async function cleanupTestUsers(): Promise<void> {
   const admin = createAdminClient();
   const failures: string[] = [];
-  while (createdUserIds.length > 0) {
-    const id = createdUserIds.pop();
-    if (!id) {
-      break;
-    }
+  // Iterate a snapshot and only drop ids that actually deleted, so a
+  // failed teardown keeps its ids registered for a later retry in-process.
+  for (const id of [...createdUserIds]) {
     const { error } = await admin.auth.admin.deleteUser(id);
     if (error) {
       failures.push(`${id}: ${error.message}`);
+    } else {
+      createdUserIds.splice(createdUserIds.indexOf(id), 1);
     }
   }
   if (failures.length > 0) {

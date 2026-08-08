@@ -80,4 +80,24 @@ describe("subscriptions injection/validation parity (DB CHECKs without zod)", ()
     expect(error?.code).toBe(CHECK_VIOLATION);
     expect(error?.message).toContain("subscriptions_name_check");
   });
+
+  it("whitespace-only name violates subscriptions_name_check (lower bound)", async () => {
+    const { error } = await user.client.from("subscriptions").insert(validSubscription({ name: "   " }));
+    expect(error?.code).toBe(CHECK_VIOLATION);
+    expect(error?.message).toContain("subscriptions_name_check");
+  });
+
+  it("lowercase currency violates subscriptions_currency_check", async () => {
+    const { error } = await user.client.from("subscriptions").insert(validSubscription({ currency: "pln" }));
+    expect(error?.code).toBe(CHECK_VIOLATION);
+    expect(error?.message).toContain("subscriptions_currency_check");
+  });
+
+  it("out-of-range interval (121) violates subscriptions_billing_interval_months_check", async () => {
+    const { error } = await user.client
+      .from("subscriptions")
+      .insert(validSubscription({ billing_cycle: "custom", billing_interval_months: 121 }));
+    expect(error?.code).toBe(CHECK_VIOLATION);
+    expect(error?.message).toContain("subscriptions_billing_interval_months_check");
+  });
 });
