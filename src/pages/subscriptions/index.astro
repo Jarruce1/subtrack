@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import DeleteSubscriptionButton from "@/components/subscriptions/DeleteSubscriptionButton";
+import StatusActions from "@/components/subscriptions/StatusActions";
 import { createClient } from "@/lib/supabase";
 import { listSubscriptions } from "@/lib/services/subscriptions";
 import { normalizeCost } from "@/lib/billing";
@@ -88,7 +89,13 @@ const rows = subscriptions.map((subscription) => ({
                         <dd class="font-medium">{formatMoney(normalized.yearly, subscription.currency)}</dd>
                       </div>
                     </dl>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <StatusActions
+                        client:load
+                        id={subscription.id}
+                        name={subscription.name}
+                        status={subscription.status}
+                      />
                       <a
                         href={`/subscriptions/${subscription.id}/edit`}
                         class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm transition-colors hover:bg-white/20"

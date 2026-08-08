@@ -256,19 +256,19 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Unit tests pass (new lifecycle suite included): `npm test`
+- [x] 1.1 Lint passes: `npm run lint` — 6bdc143
+- [x] 1.2 Unit tests pass (new lifecycle suite included): `npm test` — 6bdc143
 
 ### Phase 2: StatusActions island wired into the list
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Types check: `npx astro check`
-- [ ] 2.3 Build passes: `npm run build`
-- [ ] 2.4 Unit tests pass: `npm test`
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Types check: `npx astro check`
+- [x] 2.3 Build passes: `npm run build`
+- [x] 2.4 Unit tests pass: `npm test`
 
 #### Manual
 
-- [ ] 2.5 Smoke: pause → totals drop and renewal disappears; resume → restored; cancel → excluded but listed as cancelled; reactivate → restored (US-04)
-- [ ] 2.6 List page renders the correct action set per status
+- [x] 2.5 Smoke: pause → totals drop and renewal disappears; resume → restored; cancel → excluded but listed as cancelled; reactivate → restored (US-04)
+- [x] 2.6 List page renders the correct action set per status
