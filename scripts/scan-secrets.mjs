@@ -12,8 +12,8 @@
 // · 2 at least one hit. A hit prints the file and the NAME of the needle,
 // never the matched value — the scanner must not become the leak.
 //
-// Run via `npm run scan:secrets` (build + scan). CI wiring is test-plan §3
-// Phase 4.
+// Run via `npm run scan:secrets` (build + scan) or `npm run scan:secrets:dist`
+// (scan an existing build — what CI runs right after its own build step).
 
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";

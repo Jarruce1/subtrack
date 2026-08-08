@@ -13,7 +13,9 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
     "test:watch": "vitest",
-    "scan:secrets": "npm run build && node scripts/scan-secrets.mjs",
+    "scan:secrets": "npm run build && npm run scan:secrets:dist",
+    "scan:secrets:dist": "node scripts/scan-secrets.mjs",
+    "smoke:prod": "bash scripts/post-deploy-smoke.sh",
     "format": "prettier --write ."
   },
   "dependencies": {
