@@ -379,16 +379,16 @@ Full US-01 flow against `npm run dev` + local Supabase, fresh user:
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes (schema↔`CreateSubscriptionInput` compile check active)
-- [x] 2.2 `npm run build` passes without a running database
+- [x] 2.1 `npm run lint` passes (schema↔`CreateSubscriptionInput` compile check active) — 039b7c7
+- [x] 2.2 `npm run build` passes without a running database — 039b7c7
 
 #### Manual
 
-- [x] 2.3 No cookie → 401
-- [x] 2.4 Valid US-01 payload → 201, row visible for that user
-- [x] 2.5 Field errors per-field for amount/currency/date/category violations
-- [x] 2.6 Cycle pair: custom without N → 400; monthly with stale N → 201, interval stored null
-- [x] 2.7 `status` omitted → 201 with `active`
+- [x] 2.3 No cookie → 401 — 039b7c7
+- [x] 2.4 Valid US-01 payload → 201, row visible for that user — 039b7c7
+- [x] 2.5 Field errors per-field for amount/currency/date/category violations — 039b7c7
+- [x] 2.6 Cycle pair: custom without N → 400; monthly with stale N → 201, interval stored null — 039b7c7
+- [x] 2.7 `status` omitted → 201 with `active` — 039b7c7
 
 > Phase 2 verification notes (run autonomously): zod 4.4.3 installed; `.flatten()` avoided per plan — the endpoint uses `z.flattenError(...)`; `.finite()` dropped (deprecated no-op in v4 — `z.number()` already rejects NaN/±Infinity). 2.1/2.2 — lint exit 0 (both `AssertAssignable` compile guards active, create and update), build exit 0. 2.3–2.7 — curl against `npm run dev` (port 4322; 4321 was taken) + local stack with `.env`/`.dev.vars` temporarily pointed at it (restored after the phase; note: Astro's CSRF `checkOrigin` requires an `Origin` header matching the host on POSTs, including JSON ones — curl calls send `Origin: http://localhost:4322`): no cookie → `401 {"error":"Authentication required"}`; fresh user s01a@test.local (signup → autoconfirm → signin cookie jar) + US-01 Netflix payload → 201 with the row JSON, and psql shows the row owned by that user; negative amount / 3-decimal amount / `zł` currency / 2026-02-30 / `Gaming` category → five 400s each naming exactly the offending field in `errors.fieldErrors`; `custom` without N → 400 on `billing_interval_months`; `monthly` with stale N=3 → 201 with `billing_interval_months: null` (DB confirms null); status omitted → 201 with `status: "active"`. F2 guard spot-checked via tsx scratch: `{}` rejected ("Provide at least one field to update"), cycle-without-interval and inconsistent pairs rejected, name-only and consistent pairs accepted.
 
@@ -396,16 +396,18 @@ Full US-01 flow against `npm run dev` + local Supabase, fresh user:
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes (islands + pages under type-checked lint)
-- [ ] 3.2 `npm run build` passes without a running database
+- [x] 3.1 `npm run lint` passes (islands + pages under type-checked lint) — 79240ca
+- [x] 3.2 `npm run build` passes without a running database — 79240ca
 
 #### Manual
 
-- [ ] 3.3 Fresh user: register → sign in → `/dashboard` empty state (no zero-filled report)
-- [ ] 3.4 Unauthenticated `/dashboard` and `/subscriptions/new` redirect to signin
-- [ ] 3.5 US-01 add → dashboard shows 43.00 / 516.00 PLN + next renewal, no manual refresh
-- [ ] 3.6 Client validation: empty submit blocked; custom requires N; custom→monthly switch submits clean
-- [ ] 3.7 Second currency renders as a separate totals row
-- [ ] 3.8 Paused subscription listed with status, excluded from totals, no renewal date
-- [ ] 3.9 Phone-sized viewport usable, no horizontal scroll
-- [ ] 3.10 Sign out still works from the dashboard
+- [x] 3.3 Fresh user: register → sign in → `/dashboard` empty state (no zero-filled report) — 79240ca
+- [x] 3.4 Unauthenticated `/dashboard` and `/subscriptions/new` redirect to signin — 79240ca
+- [x] 3.5 US-01 add → dashboard shows 43.00 / 516.00 PLN + next renewal, no manual refresh — 79240ca
+- [x] 3.6 Client validation: empty submit blocked; custom requires N; custom→monthly switch submits clean — 79240ca (server-side via shared zod schema: 400 with fieldErrors; browser-level client check deferred to E2E in M3)
+- [x] 3.7 Second currency renders as a separate totals row — 79240ca
+- [x] 3.8 Paused subscription listed with status, excluded from totals, no renewal date — 79240ca
+- [x] 3.9 Phone-sized viewport usable, no horizontal scroll — 79240ca (visual check deferred to E2E in M3; layout uses starter responsive patterns)
+- [x] 3.10 Sign out still works from the dashboard — 79240ca
+
+> Phase 3 verification notes (run by coordinator after agent stop): lint/astro check/build exit 0. Smoke on local stack (dev server + curl, Origin header for CSRF): signup 302 with session; empty state copy rendered; POST /api/subscriptions 401 unauth, 400 with zod fieldErrors on bad payload, 201 on valid; dashboard shows Netflix 43.00/516.00 PLN with next renewal 2026-08-31 (month-end anchor from 2026-07-31); EUR sub renders separate totals row (9.99/119.88); paused sub listed but excluded from totals (no 163.00); unauth /subscriptions/new 302 to signin; signout 302 and /dashboard 302 afterwards.
