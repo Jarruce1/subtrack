@@ -36,7 +36,7 @@ People with 5–30 subscriptions have charges scattered across statements and in
 | S-02 | renewal-edgecase-correctness | trust renewal dates across month-end and leap-year cases                           | S-01          | US-02, FR-010, NFR (correctness)                            | done |
 | S-03 | manage-subscription-list    | view all subscriptions with status, edit any field, delete an entry                | S-01          | FR-005, FR-006, FR-007                                      | in-progress |
 | S-04 | status-lifecycle-totals     | pause/cancel/reactivate and see totals + renewals reflect only active items        | S-03          | US-04, FR-008                                               | ready |
-| S-05 | upcoming-renewals-list      | see renewals due in the next 30 days, soonest first                                | S-01          | FR-013                                                      | ready |
+| S-05 | upcoming-renewals-list      | see renewals due in the next 30 days, soonest first                                | S-01          | FR-013                                                      | in-progress |
 | S-06 | category-cost-breakdown     | see cost totals broken down per category                                           | S-01          | FR-012                                                      | proposed |
 | S-07 | duplicate-name-warning      | get a non-blocking duplicate warning on add or rename, and save anyway             | S-01, S-03    | US-03, FR-014                                               | proposed |
 
@@ -139,7 +139,7 @@ Note: no automated tests exist yet. The verification harness for the renewal ari
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Pure read-only derivation over data S-01 already computes; low risk, high habit value — a natural parallel-agent slice.
-- **Status:** ready
+- **Status:** in-progress
 
 ### S-06: Per-category cost breakdown
 

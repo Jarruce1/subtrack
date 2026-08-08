@@ -1,4 +1,4 @@
-import type { BillingCycle, CurrencyTotal, NormalizedCost, Subscription } from "@/types";
+import type { BillingCycle, CurrencyTotal, NormalizedCost, Subscription, UpcomingRenewal } from "@/types";
 
 // Pure billing arithmetic (PRD Business Logic §1–3). No I/O, no Date.now():
 // `today` is always a parameter, so every function is deterministic and
@@ -14,6 +14,7 @@ import type { BillingCycle, CurrencyTotal, NormalizedCost, Subscription } from "
 const MONTHS_PER_YEAR = 12;
 const WEEKS_PER_YEAR = 52;
 const MS_PER_DAY = 86_400_000;
+const UPCOMING_WINDOW_DAYS = 30;
 
 /** Normalize a raw cycle amount to unrounded monthly and yearly costs (Business Logic §1). Rounding happens once, at display. */
 export function normalizeCost(amount: number, cycle: BillingCycle, intervalMonths: number | null): NormalizedCost {
@@ -96,6 +97,35 @@ export function summarizeActive(subscriptions: Subscription[]): CurrencyTotal[] 
     }
   }
   return [...totals.values()].sort((a, b) => a.currency.localeCompare(b.currency));
+}
+
+/**
+ * Active subscriptions whose next renewal falls within [today, today + 30
+ * days], soonest first (Business Logic §4). Both window endpoints are
+ * inclusive: a renewal on `today` and one exactly 30 days out both count.
+ * The lower bound holds by construction (nextRenewalDate never returns a
+ * past date), so only the upper bound is checked. The sort is stable, so
+ * same-day renewals keep their input order. `today` is validated before any
+ * filtering — an invalid date throws even for an empty or all-paused list.
+ */
+export function upcomingRenewals(subscriptions: Subscription[], today: string): UpcomingRenewal[] {
+  const windowEnd = formatIsoDate(addDays(parseIsoDate(today), UPCOMING_WINDOW_DAYS));
+  const upcoming: UpcomingRenewal[] = [];
+  for (const subscription of subscriptions) {
+    if (subscription.status !== "active") {
+      continue;
+    }
+    const renewalDate = nextRenewalDate(
+      subscription.start_date,
+      subscription.billing_cycle,
+      subscription.billing_interval_months,
+      today,
+    );
+    if (renewalDate <= windowEnd) {
+      upcoming.push({ subscription, renewalDate });
+    }
+  }
+  return upcoming.sort((a, b) => (a.renewalDate < b.renewalDate ? -1 : a.renewalDate > b.renewalDate ? 1 : 0));
 }
 
 // --- internal date helpers (integer y/m/d; month is 1–12) ---
