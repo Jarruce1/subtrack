@@ -263,12 +263,12 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Types check: `npx astro check`
-- [x] 2.3 Build passes: `npm run build`
-- [x] 2.4 Unit tests pass: `npm test`
+- [x] 2.1 Lint passes: `npm run lint` — 0efaaa8
+- [x] 2.2 Types check: `npx astro check` — 0efaaa8
+- [x] 2.3 Build passes: `npm run build` — 0efaaa8
+- [x] 2.4 Unit tests pass: `npm test` — 0efaaa8
 
 #### Manual
 
-- [x] 2.5 Smoke: pause → totals drop and renewal disappears; resume → restored; cancel → excluded but listed as cancelled; reactivate → restored (US-04)
-- [x] 2.6 List page renders the correct action set per status
+- [x] 2.5 Smoke: pause → totals drop and renewal disappears; resume → restored; cancel → excluded but listed as cancelled; reactivate → restored (US-04) — 0efaaa8
+- [x] 2.6 List page renders the correct action set per status — 0efaaa8
