@@ -138,8 +138,16 @@ export async function cleanupTestUsers(): Promise<void> {
   }
 }
 
-/** A valid subscriptions insert payload (DB-level shape); override per test. */
-export function validSubscription(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+export type SubscriptionInsert = Database["public"]["Tables"]["subscriptions"]["Insert"];
+
+/**
+ * A valid subscriptions insert payload (DB-level shape); override per test.
+ * Typed against the generated Insert row — malicious payloads in the parity
+ * suite are wrong VALUES of the right TYPES (negative amount, oversized
+ * note, mismatched cycle/interval), so they stay type-checkable while still
+ * bypassing zod entirely.
+ */
+export function validSubscription(overrides: Partial<SubscriptionInsert> = {}): SubscriptionInsert {
   return {
     name: "Integration Test Service",
     amount: 9.99,
