@@ -3,7 +3,7 @@
 // cites its source so a failure reads as a spec violation. The generated-input
 // safety net lives in billing.properties.test.ts.
 import { describe, expect, it } from "vitest";
-import { nextRenewalDate, normalizeCost, summarizeActive } from "@/lib/billing";
+import { nextRenewalDate, normalizeCost, summarizeActive, upcomingRenewals } from "@/lib/billing";
 import type { Subscription } from "@/types";
 
 let fixtureCount = 0;
@@ -226,5 +226,74 @@ describe("summarizeActive (Business Logic §3)", () => {
   it("custom-cycle subscription contributes amount / N to the monthly total", () => {
     const totals = summarizeActive([sub({ amount: 90, billing_cycle: "custom", billing_interval_months: 18 })]);
     expect(totals).toEqual([{ currency: "PLN", monthly: 90 / 18, yearly: (90 * 12) / 18 }]);
+  });
+});
+
+describe("upcomingRenewals (Business Logic §4 / FR-013)", () => {
+  // Window fixtures use today 2026-08-08; the inclusive upper bound is
+  // 2026-09-07 (30 days out) and 2026-09-08 is day 31 — just outside.
+  const TODAY = "2026-08-08";
+
+  it("empty input → []", () => {
+    expect(upcomingRenewals([], TODAY)).toEqual([]);
+  });
+
+  it("renewal exactly on today is included (lower bound inclusive)", () => {
+    const s = sub({ start_date: "2026-07-08" }); // monthly → renews 2026-08-08
+    expect(upcomingRenewals([s], TODAY)).toEqual([{ subscription: s, renewalDate: "2026-08-08" }]);
+  });
+
+  it("renewal exactly on today + 30 is included (upper bound inclusive: 2026-09-07)", () => {
+    const s = sub({ start_date: "2026-08-07" }); // monthly → renews 2026-09-07
+    expect(upcomingRenewals([s], TODAY)).toEqual([{ subscription: s, renewalDate: "2026-09-07" }]);
+  });
+
+  it("renewal on day 31 is excluded (yearly 2025-09-08 → 2026-09-08)", () => {
+    expect(upcomingRenewals([sub({ start_date: "2025-09-08", billing_cycle: "yearly" })], TODAY)).toEqual([]);
+  });
+
+  it("window end is calendar-exact across a 28-day February (today 2026-01-31 → end 2026-03-02)", () => {
+    const inside = sub({ start_date: "2026-03-02" }); // future start = own renewal (k = 0)
+    const outside = sub({ start_date: "2026-03-03" });
+    expect(upcomingRenewals([inside, outside], "2026-01-31")).toEqual([
+      { subscription: inside, renewalDate: "2026-03-02" },
+    ]);
+  });
+
+  it("paused and cancelled are excluded even when renewing inside the window (§3/§4 active-only rule)", () => {
+    const active = sub({ start_date: "2026-07-10" }); // → 2026-08-10
+    const paused = sub({ start_date: "2026-07-09", status: "paused" });
+    const cancelled = sub({ start_date: "2026-07-11", status: "cancelled" });
+    expect(upcomingRenewals([paused, active, cancelled], TODAY)).toEqual([
+      { subscription: active, renewalDate: "2026-08-10" },
+    ]);
+  });
+
+  it("future start date inside the window is its own next renewal (§2 k = 0)", () => {
+    const s = sub({ start_date: "2026-08-20", billing_cycle: "yearly" });
+    expect(upcomingRenewals([s], TODAY)).toEqual([{ subscription: s, renewalDate: "2026-08-20" }]);
+  });
+
+  it("sorted soonest first across mixed cycles", () => {
+    const yearly = sub({ start_date: "2025-09-05", billing_cycle: "yearly" }); // → 2026-09-05
+    const weekly = sub({ start_date: "2026-08-06", billing_cycle: "weekly" }); // → 2026-08-13
+    const monthly = sub({ start_date: "2026-07-10" }); // → 2026-08-10
+    expect(upcomingRenewals([yearly, weekly, monthly], TODAY)).toEqual([
+      { subscription: monthly, renewalDate: "2026-08-10" },
+      { subscription: weekly, renewalDate: "2026-08-13" },
+      { subscription: yearly, renewalDate: "2026-09-05" },
+    ]);
+  });
+
+  it("stable ordering: same-day renewals keep input order", () => {
+    const first = sub({ name: "First", start_date: "2026-07-20" }); // → 2026-08-20
+    const second = sub({ name: "Second", start_date: "2026-07-20" }); // → 2026-08-20
+    expect(upcomingRenewals([first, second], TODAY).map((u) => u.subscription.name)).toEqual(["First", "Second"]);
+    expect(upcomingRenewals([second, first], TODAY).map((u) => u.subscription.name)).toEqual(["Second", "First"]);
+  });
+
+  it("invalid today throws even with an empty list (validate-first, like nextRenewalDate)", () => {
+    expect(() => upcomingRenewals([], "2026-02-30")).toThrow(/invalid/);
+    expect(() => upcomingRenewals([], "")).toThrow(/invalid/);
   });
 });

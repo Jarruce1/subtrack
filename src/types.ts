@@ -27,3 +27,7 @@ export interface CurrencyTotal {
   monthly: number;
   yearly: number;
 }
+export interface UpcomingRenewal {
+  subscription: Subscription;
+  renewalDate: string; // ISO YYYY-MM-DD, nextRenewalDate output
+}
