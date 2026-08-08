@@ -383,6 +383,29 @@ None — no schema, no data, no deploy-surface changes.
   `src/lib/services/subscriptions.ts:16-78`
 - Redirect-with-error exemplar: `src/pages/api/auth/signin.ts:15-17`
 
+## Addendum (impl-review triage, 2026-08-09)
+
+Two changes beyond the literal "Changes Required" lists, both within the
+plan's stated intent and recorded here so the plan stays the source of
+truth (impl-review D1/EXTRA findings):
+
+- `context/foundation/test-plan.md` §4 stack table: the secret-scan row's
+  "none yet — see Phase 3" placeholder was flipped to "Exists: …". The
+  Phase 4 Contract's freeze wording named only the §3 Status cell, but the
+  §4 row was a forward reference to this very phase; leaving it stale
+  would contradict §3.
+- `eslint.config.js`: a scoped `scripts/**/*.mjs` block (non-type-aware
+  rules + node globals) — the minimal realization of success criterion 3.3
+  ("script covered by eslint flat config or ignored").
+
+Triage fixes applied post-review: the scanner treats an unreadable client
+file as a finding (fail-closed, exit 2) instead of crashing with an
+ambiguous exit 1; the sign-out null-client branch carries a comment
+documenting why its "/" redirect is honest. Out-of-diff observations
+(free-text `?error=` rendering; signin/signup forwarding
+`error.message` in URLs against the new lessons rule) are queued in
+`follow-ups/review-fixes.md`.
+
 ## Verification Evidence
 
 (Kept out of `## Progress` — that section is a mechanical contract,
@@ -448,9 +471,9 @@ headings + bullets only.)
 
 #### Automated
 
-- [ ] 4.1 Full gate battery green: lint, astro check, build, unit, integration, scan:secrets
-- [ ] 4.2 `npm run test:e2e` 5/5 green
+- [x] 4.1 Full gate battery green: lint, astro check, build, unit, integration, scan:secrets — 8558ade
+- [x] 4.2 `npm run test:e2e` 5/5 green — 8558ade
 
 #### Manual
 
-- [ ] 4.3 Mirror table complete in Progress note
+- [x] 4.3 Mirror table complete in Progress note — 8558ade
