@@ -337,14 +337,37 @@ run is killed hard, restore manually from `*.e2e-backup`.
 
 #### Automated
 - [x] 2.1 seed.spec.ts green (first run); lint + unit(99) clean; env
-      files restored after run
+      files restored after run — aa75347
 
 ### Phase 3: Risk tests
 
 #### Automated
-- [ ] 3.1 north-star-flow.spec.ts (risk #4: flow + gating) green
-- [ ] 3.2 cross-view-consistency.spec.ts (risk #1) green
-- [ ] 3.3 five-anti-pattern review of both specs documented
+- [x] 3.1 north-star-flow.spec.ts (risk #4: flow + gating) green.
+      Note: `PLN 43.00` plain-space assertions match — Playwright text
+      matching normalizes the NBSP Intl emits (plan-review O1 resolved)
+- [x] 3.2 cross-view-consistency.spec.ts (risk #1) green. Discovery:
+      Astro's CSRF checkOrigin 403s form-encoded API posts without an
+      Origin header — the API-signup helper sends `origin: BASE_URL`
+      (same value a browser sends; the protection stays exercised)
+- [x] 3.3 five-anti-pattern review (all specs + auth.setup):
+      1. hallucinated assertion — none: oracles are hand-derived PRD
+         constants asserted on rendered text; absence asserted with
+         toHaveCount(0); power proven by the Phase 4 break gate.
+      2. brittle selector — none user-facing (getByRole/Label/Text
+         only; grep for page.locator/css/xpath in specs: 0 hits).
+         Accepted exception: hydration helper waits on
+         `astro-island[ssr]` detaching — infrastructure readiness
+         state, never element location; documented in the helper.
+      3. shared state — none: per-test users (UI signup in north-star
+         — the flow under test; API signup in cross-view), storageState
+         user only backs the seed exemplar; suite passes fully
+         parallel (2 workers).
+      4. waitForTimeout — zero; waits are waitForURL / toBeVisible /
+         toHaveCount / toContainText / toHaveValue.
+      5. no cleanup — cross-view cleans in afterEach (runs on
+         failure); seed/north-star clean via the UI delete they also
+         exercise; unique per-test users make any crash leftovers
+         collision-free; `e2e-` prefix marks users for db reset.
 
 ### Phase 4: Verification gates + docs
 
