@@ -12,13 +12,18 @@ import {
   SUBSCRIPTION_STATUSES,
   subscriptionCreateSchema,
 } from "@/lib/validation/subscriptions";
+import type { Subscription } from "@/types";
 
-// FR-004 add-subscription form. Follows the SignInForm island pattern
-// (controlled fields, client pre-validation, noValidate) but posts JSON to
-// POST /api/subscriptions and renders zod field errors in place — client and
-// server share subscriptionCreateSchema, one source of truth for both sides
-// of the wire. On 201 it does a full navigation to /dashboard so totals are
-// always SSR-computed fresh (no stale aggregates).
+// FR-004/FR-006 subscription form, dual-mode (S-03 generalization of the S-01
+// add form; field markup, validation wiring, and error rendering are shared).
+// A `subscription` prop switches to edit mode: state prefills from the row and
+// submit PATCHes the item route with the FULL field set — always non-empty and
+// cycle/interval-consistent, so it satisfies subscriptionUpdateSchema's guards
+// while partial PATCH remains a valid API contract for other clients. Client
+// and server share the create schema for pre-validation (its output shape is a
+// valid update payload — normalizes stale intervals to null). On success both
+// modes do a full navigation (add → /dashboard, edit → /subscriptions) so the
+// next render is fresh SSR (no stale aggregates).
 
 type FieldErrors = Record<string, string[] | undefined>;
 
@@ -34,16 +39,25 @@ const CYCLE_LABELS: Record<(typeof BILLING_CYCLES)[number], string> = {
   custom: "Custom (every N months)",
 };
 
-export default function AddSubscriptionForm() {
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("PLN");
-  const [billingCycle, setBillingCycle] = useState<string>("monthly");
-  const [intervalMonths, setIntervalMonths] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [category, setCategory] = useState<string>("");
-  const [status, setStatus] = useState<string>("active");
-  const [note, setNote] = useState("");
+interface SubscriptionFormProps {
+  /** Row to edit; omit for add mode. */
+  subscription?: Subscription;
+}
+
+export default function SubscriptionForm({ subscription }: SubscriptionFormProps) {
+  const isEdit = subscription !== undefined;
+
+  const [name, setName] = useState(subscription?.name ?? "");
+  const [amount, setAmount] = useState(subscription ? String(subscription.amount) : "");
+  const [currency, setCurrency] = useState(subscription?.currency ?? "PLN");
+  const [billingCycle, setBillingCycle] = useState<string>(subscription?.billing_cycle ?? "monthly");
+  const [intervalMonths, setIntervalMonths] = useState(
+    subscription?.billing_interval_months != null ? String(subscription.billing_interval_months) : "",
+  );
+  const [startDate, setStartDate] = useState(subscription?.start_date ?? "");
+  const [category, setCategory] = useState<string>(subscription?.category ?? "");
+  const [status, setStatus] = useState<string>(subscription?.status ?? "active");
+  const [note, setNote] = useState(subscription?.note ?? "");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -82,18 +96,22 @@ export default function AddSubscriptionForm() {
     setFieldErrors({});
     setSubmitting(true);
     try {
-      const response = await fetch("/api/subscriptions", {
-        method: "POST",
+      const response = await fetch(isEdit ? `/api/subscriptions/${subscription.id}` : "/api/subscriptions", {
+        method: isEdit ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsed.data),
       });
 
-      if (response.status === 201) {
-        window.location.assign("/dashboard");
+      if (response.status === (isEdit ? 200 : 201)) {
+        window.location.assign(isEdit ? "/subscriptions" : "/dashboard");
         return;
       }
       if (response.status === 401) {
         window.location.assign("/auth/signin");
+        return;
+      }
+      if (isEdit && response.status === 404) {
+        setFormErrors(["This subscription no longer exists."]);
         return;
       }
       if (response.status === 400) {
@@ -299,7 +317,7 @@ export default function AddSubscriptionForm() {
       )}
 
       <Button type="submit" disabled={submitting} className="w-full">
-        {submitting ? "Saving…" : "Add subscription"}
+        {submitting ? "Saving…" : isEdit ? "Save changes" : "Add subscription"}
       </Button>
     </form>
   );

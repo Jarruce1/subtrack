@@ -1,0 +1,59 @@
+---
+import { z } from "zod";
+import Layout from "@/layouts/Layout.astro";
+import SubscriptionForm from "@/components/subscriptions/SubscriptionForm";
+import { createClient } from "@/lib/supabase";
+import { getSubscription } from "@/lib/services/subscriptions";
+
+// FR-006 edit page. Auth is enforced by middleware (PROTECTED_ROUTES prefix
+// "/subscriptions"); this page owns the 404 boundary: malformed, foreign, and
+// nonexistent ids are indistinguishable by design (RLS + uuid pre-check).
+// Status is set via Astro.response (a top-level `return new Response` crashes
+// astro-eslint-parser under no-misused-promises), and the body renders a
+// minimal not-found notice instead of the form.
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+const id = z.uuid().safeParse(Astro.params.id);
+const subscription = supabase && id.success ? await getSubscription(supabase, id.data) : null;
+
+if (supabase && !subscription) {
+  Astro.response.status = 404;
+}
+---
+
+<Layout title={subscription ? "Edit subscription" : "Not found"}>
+  <div class="bg-cosmic dark min-h-screen p-4 sm:py-10">
+    <div
+      class="mx-auto w-full max-w-lg rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl sm:p-8"
+    >
+      {
+        !supabase ? (
+          <p class="text-center text-blue-100/80">Supabase is not configured.</p>
+        ) : !subscription ? (
+          <>
+            <h1 class="text-center text-2xl font-bold">Not found</h1>
+            <p class="mt-2 text-center text-sm text-blue-100/80">This subscription does not exist.</p>
+            <p class="mt-4 text-center text-sm">
+              <a href="/subscriptions" class="text-purple-300 hover:underline">
+                &larr; Back to subscriptions
+              </a>
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
+              Edit subscription
+            </h1>
+            <SubscriptionForm subscription={subscription} client:load />
+            <p class="mt-4 text-center text-sm">
+              <a href="/subscriptions" class="text-purple-300 hover:underline">
+                &larr; Back to subscriptions
+              </a>
+            </p>
+          </>
+        )
+      }
+    </div>
+  </div>
+</Layout>
