@@ -334,17 +334,17 @@ revert the three commits.
 
 #### Manual
 
-- [x] 2.5 Authenticated curl checks: exact dup, normalized dup, no match, exclude self, 401
+- [x] 2.5 Authenticated curl checks: exact dup, normalized dup, no match, exclude self, 401 — 52e5206
 
 ### Phase 3: Form warning flow (add + rename)
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Type check passes: `npx astro check`
-- [x] 3.3 Unit tests pass: `npm test`
-- [x] 3.4 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint` — 52e5206
+- [x] 3.2 Type check passes: `npx astro check` — 52e5206
+- [x] 3.3 Unit tests pass: `npm test` — 52e5206
+- [x] 3.4 Build passes: `npm run build` — 52e5206
 
 #### Manual
 
-- [x] 3.5 Smoke: add dup warns, save-anyway persists, rename dup warns, no-match silent, no self-match
+- [x] 3.5 Smoke: add dup warns, save-anyway persists, rename dup warns, no-match silent, no self-match — 52e5206
