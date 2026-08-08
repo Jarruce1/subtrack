@@ -1,7 +1,7 @@
 ---
 change_id: manage-subscription-list
 title: Subscription list with edit and delete (S-03)
-status: implementing
+status: implemented
 created: 2026-08-08
 updated: 2026-08-08
 archived_at: null

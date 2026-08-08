@@ -301,18 +301,18 @@ FR-006: generalize the add form into a dual-mode `SubscriptionForm`, host it on 
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes
-- [x] 3.2 `npx astro check` passes
-- [x] 3.3 `npm run build` passes
-- [x] 3.4 `npm test` passes
+- [x] 3.1 `npm run lint` passes — f47feca
+- [x] 3.2 `npx astro check` passes — f47feca
+- [x] 3.3 `npm run build` passes — f47feca
+- [x] 3.4 `npm test` passes — f47feca
 
 #### Manual
 
-- [x] 3.5 Edit form prefilled with the row's values (incl. custom interval, note, status)
-- [x] 3.6 Save name/amount change → list and dashboard reflect it
-- [x] 3.7 Cycle round-trip: monthly → custom-3 → monthly (interval stored null)
-- [x] 3.7b Start-date edit → dashboard next renewal re-derived from the new anchor
-- [x] 3.8 Client validation blocks bad input in edit mode without a network call
-- [x] 3.9 Foreign / nonexistent / malformed id → 404 for the edit page
-- [x] 3.10 `/subscriptions/new` add flow regression passes
-- [x] 3.11 Unauthenticated edit URL → redirect to signin
+- [x] 3.5 Edit form prefilled with the row's values (incl. custom interval, note, status) — f47feca
+- [x] 3.6 Save name/amount change → list and dashboard reflect it — f47feca
+- [x] 3.7 Cycle round-trip: monthly → custom-3 → monthly (interval stored null) — f47feca
+- [x] 3.7b Start-date edit → dashboard next renewal re-derived from the new anchor — f47feca
+- [x] 3.8 Client validation blocks bad input in edit mode without a network call — f47feca
+- [x] 3.9 Foreign / nonexistent / malformed id → 404 for the edit page — f47feca
+- [x] 3.10 `/subscriptions/new` add flow regression passes — f47feca
+- [x] 3.11 Unauthenticated edit URL → redirect to signin — f47feca
