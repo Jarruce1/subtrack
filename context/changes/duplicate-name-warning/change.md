@@ -1,7 +1,7 @@
 ---
 change_id: duplicate-name-warning
 title: Non-blocking duplicate-name warning on add and rename
-status: implemented
+status: impl_reviewed
 created: 2026-08-08
 updated: 2026-08-09
 archived_at: null
