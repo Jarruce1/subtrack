@@ -312,11 +312,11 @@ Behavioral invariants:
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes with the service module
-- [x] 3.2 `npm run build` passes
+- [x] 3.1 `npm run lint` passes with the service module — c0629ce
+- [x] 3.2 `npm run build` passes — c0629ce
 
 #### Manual
 
-- [x] 3.3 Invariant review: no `user_id` handling, no own client, not-found mapping per contract
+- [x] 3.3 Invariant review: no `user_id` handling, no own client, not-found mapping per contract — c0629ce
 
 > Phase 3 verification notes (run autonomously): 3.1/3.2 — lint exit 0, build exit 0 (plus `npx astro check`: 0 errors, 0 warnings). 3.3 — reviewed against the contract: the service never references `user_id` (inserts rely on the column's `auth.uid()` default; input types omit identity/audit fields), imports only the `TypedSupabaseClient` type from `@/lib/supabase` (no client creation, no service-role key), `getSubscription` uses `maybeSingle()` → `null`, `updateSubscription` maps PostgREST `PGRST116` (no row after RLS filtering) → `null`, `deleteSubscription` returns `data.length > 0`, `listSubscriptions` orders by `created_at desc`, and all other `PostgrestError`s are thrown as `Error(error.message)`.
