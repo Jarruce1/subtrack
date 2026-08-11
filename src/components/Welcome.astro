@@ -2,150 +2,146 @@
 import Topbar from "@/components/Topbar.astro";
 
 const { user } = Astro.locals;
+
+const featureIcon = "mb-3 text-link";
 ---
 
-<div class="bg-cosmic relative min-h-screen w-full overflow-hidden">
-  <!-- Cosmic orbs -->
-  <div
-    class="pointer-events-none absolute top-1/4 -left-24 h-[350px] w-[350px] rounded-full bg-purple-500/20 blur-[120px]"
-  >
-  </div>
-  <div
-    class="pointer-events-none absolute top-2/3 -right-16 h-[250px] w-[250px] rounded-full bg-blue-500/15 blur-[100px]"
-  >
-  </div>
-  <div
-    class="pointer-events-none absolute top-0 left-1/2 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-indigo-400/10 blur-[140px]"
-  >
-  </div>
+<Topbar />
 
-  <!-- Star field -->
-  <div
-    class="pointer-events-none absolute inset-0"
-    style="background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px), radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px), radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 200px 200px, 150px 150px, 100px 100px; background-position: 0 0, 40px 60px, 80px 30px;"
-  >
-  </div>
-
-  <div class="relative z-10 p-4 sm:p-8">
-    <Topbar />
-
-    <!-- Hero section -->
-    <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 py-20 text-center sm:py-28 lg:py-32">
-      <p
-        class="mb-6 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-blue-100/80 uppercase"
-      >
-        Subscription cost &amp; renewal tracker
-      </p>
-      <h1
-        class="mb-6 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl"
-      >
-        Know what your subscriptions really cost
-      </h1>
-      <p class="mb-10 max-w-2xl text-lg text-blue-100/70 sm:text-xl">
-        Streaming, SaaS, gym, cloud storage &mdash; every cycle normalized to one true monthly and yearly total, with
-        every renewal date computed exactly. No spreadsheet, no surprises.
-      </p>
-      <div class="flex flex-col gap-4 sm:flex-row">
-        {
-          user ? (
+<main id="main" class="bg-hero-wash">
+  <div class="mx-auto flex max-w-4xl flex-col items-center px-4 pt-16 pb-14 text-center sm:pt-24">
+    <p
+      class="text-link border-success-border bg-accent mb-6 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-widest uppercase"
+    >
+      Subscription cost &amp; renewal tracker
+    </p>
+    <h1 class="max-w-[18ch] text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl">
+      Know what your subscriptions <span class="text-link">really cost</span>
+    </h1>
+    <p class="text-muted-foreground mt-5 max-w-2xl text-lg sm:text-xl">
+      Streaming, SaaS, gym, cloud storage &mdash; every cycle normalized to one true monthly and yearly total, with
+      every renewal date computed exactly. No spreadsheet, no surprises.
+    </p>
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      {
+        user ? (
+          <a
+            href="/dashboard"
+            class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-11 items-center justify-center rounded-lg px-6 py-2.5 text-base font-semibold transition-colors"
+          >
+            Go to dashboard
+          </a>
+        ) : (
+          <>
             <a
-              href="/dashboard"
-              class="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-purple-500"
+              href="/auth/signup"
+              class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-11 items-center justify-center rounded-lg px-6 py-2.5 text-base font-semibold transition-colors"
             >
-              Go to dashboard
+              Start tracking &mdash; it's free
             </a>
-          ) : (
-            <>
-              <a
-                href="/auth/signup"
-                class="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-purple-500"
-              >
-                Start tracking &mdash; it's free
-              </a>
-              <a
-                href="/auth/signin"
-                class="inline-flex items-center justify-center rounded-lg border border-white/20 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-white/10"
-              >
-                Sign in
-              </a>
-            </>
-          )
-        }
-      </div>
+            <a
+              href="/auth/signin"
+              class="border-input bg-card hover:bg-accent hover:border-ring inline-flex min-h-11 items-center justify-center rounded-lg border px-6 py-2.5 text-base font-semibold transition-colors"
+            >
+              Sign in
+            </a>
+          </>
+        )
+      }
     </div>
 
-    <!-- Feature cards -->
-    <div class="mx-auto grid max-w-4xl grid-cols-1 gap-6 px-4 pb-24 sm:grid-cols-3">
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-purple-300"
-        >
-          <line x1="12" x2="12" y1="2" y2="22"></line>
-          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">One true total</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Weekly, monthly, yearly, every-3-months &mdash; mixed billing cycles normalized into a single monthly and
-          yearly cost you can trust.
-        </p>
+    <div
+      class="border-border bg-card mt-14 flex flex-wrap justify-center gap-x-9 gap-y-5 rounded-2xl border px-7 py-5 shadow-sm"
+      aria-label="Example dashboard summary"
+    >
+      <div class="flex flex-col text-left">
+        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Monthly total</span>
+        <span class="text-2xl font-bold tabular-nums">PLN 187.46</span>
+        <span class="text-muted-foreground text-sm">12 active subscriptions</span>
       </div>
-
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-purple-300"
-        >
-          <path d="M8 2v4"></path>
-          <path d="M16 2v4"></path>
-          <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-          <path d="M3 10h18"></path>
-          <path d="m9 16 2 2 4-4"></path>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Never miss a renewal</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Exact next-renewal dates &mdash; month-end and leap-year cases included &mdash; plus a 30-day upcoming list so
-          you can cancel before you're charged.
-        </p>
+      <div class="flex flex-col text-left">
+        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Yearly total</span>
+        <span class="text-2xl font-bold tabular-nums">PLN 2,249.52</span>
+        <span class="text-muted-foreground text-sm">across all cycles</span>
       </div>
-
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-purple-300"
-        >
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Private by design</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Your account, your data &mdash; enforced at the database level. Nobody else ever sees what you pay for.
-        </p>
+      <div class="flex flex-col text-left">
+        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Next renewal</span>
+        <span class="text-2xl font-bold tabular-nums">Aug 15</span>
+        <span class="text-muted-foreground text-sm">Netflix &middot; PLN 43.00</span>
       </div>
     </div>
   </div>
-</div>
+
+  <div class="mx-auto grid max-w-4xl grid-cols-1 gap-4 px-4 pb-20 sm:grid-cols-3">
+    <div class="border-border bg-card rounded-2xl border p-6 shadow-sm">
+      <svg
+        aria-hidden="true"
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class:list={featureIcon}
+      >
+        <line x1="12" y1="2" x2="12" y2="22"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+      <h2 class="mb-2 text-lg font-semibold">One true total</h2>
+      <p class="text-muted-foreground text-sm leading-relaxed">
+        Weekly, monthly, yearly, every-3-months &mdash; mixed billing cycles normalized into a single monthly and yearly
+        cost you can trust.
+      </p>
+    </div>
+
+    <div class="border-border bg-card rounded-2xl border p-6 shadow-sm">
+      <svg
+        aria-hidden="true"
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class:list={featureIcon}
+      >
+        <path d="M8 2v4"></path>
+        <path d="M16 2v4"></path>
+        <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+        <path d="M3 10h18"></path>
+        <path d="m9 16 2 2 4-4"></path>
+      </svg>
+      <h2 class="mb-2 text-lg font-semibold">Never miss a renewal</h2>
+      <p class="text-muted-foreground text-sm leading-relaxed">
+        Exact next-renewal dates &mdash; month-end and leap-year cases included &mdash; plus a 30-day upcoming list so
+        you can cancel before you're charged.
+      </p>
+    </div>
+
+    <div class="border-border bg-card rounded-2xl border p-6 shadow-sm">
+      <svg
+        aria-hidden="true"
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class:list={featureIcon}
+      >
+        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <h2 class="mb-2 text-lg font-semibold">Private by design</h2>
+      <p class="text-muted-foreground text-sm leading-relaxed">
+        Your account, your data &mdash; enforced at the database level. Nobody else ever sees what you pay for.
+      </p>
+    </div>
+  </div>
+</main>

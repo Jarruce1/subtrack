@@ -1,24 +1,20 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
 import SubscriptionForm from "@/components/subscriptions/SubscriptionForm";
 
 // Auth is enforced by middleware (PROTECTED_ROUTES prefix "/subscriptions").
 ---
 
-<Layout title="Add subscription">
-  <div class="bg-cosmic dark min-h-screen p-4 sm:py-10">
-    <div
-      class="mx-auto w-full max-w-lg rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl sm:p-8"
-    >
-      <h1
-        class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent"
-      >
-        Add subscription
-      </h1>
+<Layout title="Add subscription — SubTrack">
+  <Topbar />
+  <main id="main" class="px-4 pb-16 sm:px-6">
+    <div class="border-border bg-card mx-auto mt-7 w-full max-w-lg rounded-2xl border p-6 shadow-sm sm:p-8">
+      <h1 class="mb-6 text-center text-2xl font-bold tracking-tight">Add subscription</h1>
       <SubscriptionForm client:load />
       <p class="mt-4 text-center text-sm">
-        <a href="/dashboard" class="text-purple-300 hover:underline">&larr; Back to dashboard</a>
+        <a href="/dashboard" class="text-link underline-offset-3 hover:underline">&larr; Back to dashboard</a>
       </p>
     </div>
-  </div>
+  </main>
 </Layout>

@@ -1,0 +1,25 @@
+---
+import type { SubscriptionStatus } from "@/types";
+
+interface Props {
+  status: SubscriptionStatus;
+}
+
+const { status } = Astro.props;
+
+// Dot + label — status is never conveyed by color alone (WCAG 1.4.1).
+const styles: Record<SubscriptionStatus, string> = {
+  active: "bg-success-soft text-success-text border-success-border",
+  paused: "bg-warning-soft text-warning-text border-warning-border",
+  cancelled: "bg-secondary text-muted-foreground border-input",
+};
+---
+
+<span
+  class:list={[
+    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize",
+    styles[status],
+  ]}
+>
+  <span class="size-1.5 rounded-full bg-current" aria-hidden="true"></span>{status}
+</span>

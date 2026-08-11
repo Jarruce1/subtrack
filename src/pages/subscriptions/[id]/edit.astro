@@ -1,6 +1,7 @@
 ---
 import { z } from "zod";
 import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
 import SubscriptionForm from "@/components/subscriptions/SubscriptionForm";
 import { createClient } from "@/lib/supabase";
 import { getSubscription } from "@/lib/services/subscriptions";
@@ -22,32 +23,29 @@ if (supabase && !subscription) {
 }
 ---
 
-<Layout title={subscription ? "Edit subscription" : "Not found"}>
-  <div class="bg-cosmic dark min-h-screen p-4 sm:py-10">
-    <div
-      class="mx-auto w-full max-w-lg rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl sm:p-8"
-    >
+<Layout title={subscription ? "Edit subscription — SubTrack" : "Not found — SubTrack"}>
+  <Topbar />
+  <main id="main" class="px-4 pb-16 sm:px-6">
+    <div class="border-border bg-card mx-auto mt-7 w-full max-w-lg rounded-2xl border p-6 shadow-sm sm:p-8">
       {
         !supabase ? (
-          <p class="text-center text-blue-100/80">Supabase is not configured.</p>
+          <p class="text-muted-foreground text-center">Supabase is not configured.</p>
         ) : !subscription ? (
           <>
-            <h1 class="text-center text-2xl font-bold">Not found</h1>
-            <p class="mt-2 text-center text-sm text-blue-100/80">This subscription does not exist.</p>
+            <h1 class="text-center text-2xl font-bold tracking-tight">Not found</h1>
+            <p class="text-muted-foreground mt-2 text-center text-sm">This subscription does not exist.</p>
             <p class="mt-4 text-center text-sm">
-              <a href="/subscriptions" class="text-purple-300 hover:underline">
+              <a href="/subscriptions" class="text-link underline-offset-3 hover:underline">
                 &larr; Back to subscriptions
               </a>
             </p>
           </>
         ) : (
           <>
-            <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
-              Edit subscription
-            </h1>
+            <h1 class="mb-6 text-center text-2xl font-bold tracking-tight">Edit subscription</h1>
             <SubscriptionForm subscription={subscription} client:load />
             <p class="mt-4 text-center text-sm">
-              <a href="/subscriptions" class="text-purple-300 hover:underline">
+              <a href="/subscriptions" class="text-link underline-offset-3 hover:underline">
                 &larr; Back to subscriptions
               </a>
             </p>
@@ -55,5 +53,5 @@ if (supabase && !subscription) {
         )
       }
     </div>
-  </div>
+  </main>
 </Layout>
