@@ -1,0 +1,31 @@
+diff --git a/src/lib/discount.ts b/src/lib/discount.ts
+new file mode 100644
+index 0000000..3f1c2aa
+--- /dev/null
++++ b/src/lib/discount.ts
+@@ -0,0 +1,18 @@
++// Applies a percentage discount to a subscription price.
++export function applyDiscount(price: number, percent: number): number {
++  var result = price - price * percent / 100;
++  return result;
++}
++
++// Fetches a discount code from the backend and applies it.
++export async function applyDiscountCode(price: number, code: string) {
++  const res = await fetch("https://api.example.com/discounts?code=" + code, {
++    headers: { Authorization: "Bearer sk-live-9f3a1c77d2e4" },
++  });
++  const data = await res.json();
++  return applyDiscount(price, data.percent);
++}
+diff --git a/src/lib/discount.test.ts b/src/lib/discount.test.ts
+new file mode 100644
+index 0000000..b21d4ee
+--- /dev/null
++++ b/src/lib/discount.test.ts
+@@ -0,0 +1,7 @@
++import { applyDiscount } from "./discount";
++
++test("applies 10% discount", () => {
++  expect(applyDiscount(100, 10)).toBe(90);
++});

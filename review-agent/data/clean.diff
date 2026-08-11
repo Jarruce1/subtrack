@@ -1,0 +1,68 @@
+diff --git a/src/lib/pluralize.ts b/src/lib/pluralize.ts
+new file mode 100644
+index 0000000..7d21e0b
+--- /dev/null
++++ b/src/lib/pluralize.ts
+@@ -0,0 +1,20 @@
++/**
++ * Polish plural form for a count of subscriptions, used in dashboard
++ * summaries (PRD FR-006: "N subskrypcji aktywnych").
++ *
++ * Polish has three plural forms:
++ *  - 1            -> "subskrypcja"
++ *  - 2-4, 22-24…  -> "subskrypcje" (except 12-14)
++ *  - everything else -> "subskrypcji"
++ */
++export function subscriptionLabel(count: number): string {
++  if (!Number.isInteger(count) || count < 0) {
++    throw new RangeError(`count must be a non-negative integer, got ${count}`);
++  }
++  if (count === 1) return "subskrypcja";
++  const lastTwo = count % 100;
++  const last = count % 10;
++  const isFewForm = last >= 2 && last <= 4 && !(lastTwo >= 12 && lastTwo <= 14);
++  return isFewForm ? "subskrypcje" : "subskrypcji";
++}
+diff --git a/src/lib/pluralize.test.ts b/src/lib/pluralize.test.ts
+new file mode 100644
+index 0000000..9c44a1f
+--- /dev/null
++++ b/src/lib/pluralize.test.ts
+@@ -0,0 +1,38 @@
++import { describe, expect, it } from "vitest";
++import { subscriptionLabel } from "./pluralize";
++
++// Oracles hand-derived from Polish grammar rules cited in the PRD copy
++// (FR-006), not from the implementation.
++describe("subscriptionLabel", () => {
++  it("uses singular for exactly 1", () => {
++    expect(subscriptionLabel(1)).toBe("subskrypcja");
++  });
++
++  it("uses the few-form for 2-4", () => {
++    expect(subscriptionLabel(2)).toBe("subskrypcje");
++    expect(subscriptionLabel(3)).toBe("subskrypcje");
++    expect(subscriptionLabel(4)).toBe("subskrypcje");
++  });
++
++  it("uses the many-form for 0, 5-21 and the 12-14 exception", () => {
++    expect(subscriptionLabel(0)).toBe("subskrypcji");
++    expect(subscriptionLabel(5)).toBe("subskrypcji");
++    expect(subscriptionLabel(12)).toBe("subskrypcji");
++    expect(subscriptionLabel(13)).toBe("subskrypcji");
++    expect(subscriptionLabel(14)).toBe("subskrypcji");
++    expect(subscriptionLabel(21)).toBe("subskrypcji");
++  });
++
++  it("applies the few-form again for 22-24, 32-34, ...", () => {
++    expect(subscriptionLabel(22)).toBe("subskrypcje");
++    expect(subscriptionLabel(34)).toBe("subskrypcje");
++    expect(subscriptionLabel(102)).toBe("subskrypcje");
++  });
++
++  it("rejects negative and non-integer counts", () => {
++    expect(() => subscriptionLabel(-1)).toThrow(RangeError);
++    expect(() => subscriptionLabel(1.5)).toThrow(RangeError);
++    expect(() => subscriptionLabel(Number.NaN)).toThrow(RangeError);
++  });
++});

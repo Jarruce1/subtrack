@@ -1,0 +1,22 @@
+{
+  "name": "review-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone code-review agent (Claude Agent SDK). Usage: git diff | npx tsx review.ts",
+  "type": "module",
+  "scripts": {
+    "review": "tsx review.ts",
+    "review:sample": "tsx review.ts data/sample.diff"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.228",
+    "zod": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.20.0"
+  }
+}

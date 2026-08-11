@@ -1,0 +1,80 @@
+# Ewaluacja agenta code review (M5L3) — te same diffy przez kilka modeli obok siebie.
+#
+# Uruchomienie (wymaga ANTHROPIC_API_KEY w env — patrz README.md):
+#   cd review-agent && ANTHROPIC_API_KEY=sk-ant-... npx promptfoo eval
+#   npx promptfoo view   # macierz wyników w przeglądarce
+#
+# Bramka regresji: domyślny próg jest bezwzględny — jeden nieprzechodzący
+# przypadek wybarwia całą ewaluację na czerwono (poluzowanie:
+# PROMPTFOO_PASS_RATE_THRESHOLD=95).
+
+description: "SubTrack code-review agent — porównanie modeli na tych samych diffach"
+
+prompts:
+  - file://prompts/review.txt
+
+providers:
+  # model używany dziś w review.ts — punkt odniesienia
+  - id: anthropic:messages:claude-sonnet-4-6
+    config:
+      max_tokens: 1024
+  # droższy / mocniejszy kandydat
+  - id: anthropic:messages:claude-sonnet-5
+    config:
+      max_tokens: 1024
+  # tańszy kandydat
+  - id: anthropic:messages:claude-haiku-4-5-20251001
+    config:
+      max_tokens: 1024
+
+defaultTest:
+  options:
+    # llm-rubric potrzebuje modelu-sędziego; bez tego promptfoo sięga po
+    # domyślnego providera OpenAI, którego klucza tu nie mamy.
+    provider: anthropic:messages:claude-sonnet-5
+  assert:
+    # kształt, na którym stoi bramka CI — wynik musi być poprawnym JSON-em
+    - type: is-json
+      value:
+        type: object
+        required:
+          [
+            implementationCorrectness,
+            idiomaticity,
+            complexity,
+            testRiskCoverage,
+            securitySafety,
+            verdict,
+            summary,
+          ]
+        properties:
+          verdict:
+            type: string
+            enum: [pass, fail]
+
+tests:
+  - description: "Zepsuty diff (sample.diff): hardcodowany Bearer token, var, brak walidacji odpowiedzi, test tylko happy-path"
+    vars:
+      diff: file://data/sample.diff
+    assert:
+      - type: javascript
+        value: JSON.parse(output).verdict === "fail"
+      - type: javascript
+        value: JSON.parse(output).securitySafety <= 4
+      - type: llm-rubric
+        value: >-
+          Recenzja wskazuje zahardkodowany sekret (token Bearer sk-live-... w kodzie)
+          jako złamanie hard rule i odrzuca zmianę; uzasadnienie odnosi się do
+          konkretnego problemu, nie ogólników.
+
+  - description: "Czysty diff (clean.diff): idiomatyczny helper w src/lib + colocated testy z ręcznie wyprowadzonymi oracle'ami"
+    vars:
+      diff: file://data/clean.diff
+    assert:
+      - type: javascript
+        value: JSON.parse(output).verdict === "pass"
+      - type: javascript
+        value: |
+          const r = JSON.parse(output);
+          return ["implementationCorrectness","idiomaticity","complexity","testRiskCoverage","securitySafety"]
+            .every((k) => Number.isInteger(r[k]) && r[k] >= 1 && r[k] <= 10);
