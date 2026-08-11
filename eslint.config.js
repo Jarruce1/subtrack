@@ -88,6 +88,9 @@ const astroConfig = tseslint.config({
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  // Independent package with its own deps/tsconfig; root `npm ci` doesn't
+  // install them, so type-checked rules cannot resolve its types in CI.
+  { ignores: ["review-agent/**"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
