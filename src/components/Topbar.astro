@@ -1,6 +1,11 @@
 ---
+import { getLang, translator } from "@/lib/i18n";
+
 const { user } = Astro.locals;
 const path = Astro.url.pathname;
+const lang = getLang(Astro.cookies);
+const t = translator(lang);
+const nextLang = lang === "pl" ? "en" : "pl";
 
 const navLink = "rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-foreground";
 const current = (href: string) => (path === href || path.startsWith(`${href}/`) ? "page" : undefined);
@@ -21,41 +26,49 @@ const current = (href: string) => (path === href || path.startsWith(`${href}/`) 
             aria-current={current("/dashboard")}
             class:list={[navLink, current("/dashboard") ? "bg-secondary text-foreground" : "text-muted-foreground"]}
           >
-            Dashboard
+            {t("nav.dashboard")}
           </a>
           <a
             href="/subscriptions"
             aria-current={current("/subscriptions")}
             class:list={[navLink, current("/subscriptions") ? "bg-secondary text-foreground" : "text-muted-foreground"]}
           >
-            Subscriptions
+            {t("nav.subscriptions")}
           </a>
           <span class="text-muted-foreground hidden px-2 text-sm sm:inline">{user.email}</span>
           <form method="POST" action="/api/auth/signout">
             <button type="submit" class:list={[navLink, "text-muted-foreground cursor-pointer"]}>
-              Sign out
+              {t("nav.signout")}
             </button>
           </form>
         </>
       ) : (
         <>
           <a href="/auth/signin" class:list={[navLink, "text-muted-foreground"]}>
-            Sign in
+            {t("nav.signin")}
           </a>
           <a
             href="/auth/signup"
             class="bg-primary text-primary-foreground hover:bg-primary-hover rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors"
           >
-            Sign up
+            {t("nav.signup")}
           </a>
         </>
       )
     }
     <button
       type="button"
+      data-lang-toggle={nextLang}
+      aria-label={t("nav.lang")}
+      class="border-input bg-card text-foreground hover:border-ring ml-1 inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border px-2.5 text-sm font-semibold uppercase transition-colors"
+    >
+      {nextLang}
+    </button>
+    <button
+      type="button"
       data-theme-toggle
-      aria-label="Toggle color theme"
-      class="border-input bg-card text-foreground hover:border-ring ml-1 inline-flex size-10 cursor-pointer items-center justify-center rounded-lg border transition-colors"
+      aria-label={t("nav.theme")}
+      class="border-input bg-card text-foreground hover:border-ring inline-flex size-10 cursor-pointer items-center justify-center rounded-lg border transition-colors"
     >
       <svg
         aria-hidden="true"

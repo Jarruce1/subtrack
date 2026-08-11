@@ -5,6 +5,7 @@ import Topbar from "@/components/Topbar.astro";
 import SubscriptionForm from "@/components/subscriptions/SubscriptionForm";
 import { createClient } from "@/lib/supabase";
 import { getSubscription } from "@/lib/services/subscriptions";
+import { getLang, translator } from "@/lib/i18n";
 
 // FR-006 edit page. Auth is enforced by middleware (PROTECTED_ROUTES prefix
 // "/subscriptions"); this page owns the 404 boundary: malformed, foreign, and
@@ -12,6 +13,9 @@ import { getSubscription } from "@/lib/services/subscriptions";
 // Status is set via Astro.response (a top-level `return new Response` crashes
 // astro-eslint-parser under no-misused-promises), and the body renders a
 // minimal not-found notice instead of the form.
+
+const lang = getLang(Astro.cookies);
+const t = translator(lang);
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
@@ -23,30 +27,30 @@ if (supabase && !subscription) {
 }
 ---
 
-<Layout title={subscription ? "Edit subscription — SubTrack" : "Not found — SubTrack"}>
+<Layout title={`${subscription ? t("form.edit.title") : t("notfound.title")} — SubTrack`}>
   <Topbar />
   <main id="main" class="px-4 pb-16 sm:px-6">
     <div class="border-border bg-card mx-auto mt-7 w-full max-w-lg rounded-2xl border p-6 shadow-sm sm:p-8">
       {
         !supabase ? (
-          <p class="text-muted-foreground text-center">Supabase is not configured.</p>
+          <p class="text-muted-foreground text-center">{t("noSupabase")}</p>
         ) : !subscription ? (
           <>
-            <h1 class="text-center text-2xl font-bold tracking-tight">Not found</h1>
-            <p class="text-muted-foreground mt-2 text-center text-sm">This subscription does not exist.</p>
+            <h1 class="text-center text-2xl font-bold tracking-tight">{t("notfound.title")}</h1>
+            <p class="text-muted-foreground mt-2 text-center text-sm">{t("notfound.body")}</p>
             <p class="mt-4 text-center text-sm">
               <a href="/subscriptions" class="text-link underline-offset-3 hover:underline">
-                &larr; Back to subscriptions
+                {t("form.backSubs")}
               </a>
             </p>
           </>
         ) : (
           <>
-            <h1 class="mb-6 text-center text-2xl font-bold tracking-tight">Edit subscription</h1>
-            <SubscriptionForm subscription={subscription} client:load />
+            <h1 class="mb-6 text-center text-2xl font-bold tracking-tight">{t("form.edit.title")}</h1>
+            <SubscriptionForm subscription={subscription} lang={lang} client:load />
             <p class="mt-4 text-center text-sm">
               <a href="/subscriptions" class="text-link underline-offset-3 hover:underline">
-                &larr; Back to subscriptions
+                {t("form.backSubs")}
               </a>
             </p>
           </>

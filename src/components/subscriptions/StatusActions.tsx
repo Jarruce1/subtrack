@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { statusActions } from "@/lib/lifecycle";
+import { translator, type Lang, type MessageKey } from "@/lib/i18n";
 import type { SubscriptionStatus } from "@/types";
 
 // FR-008 / US-04 quick lifecycle actions on the list: pause / resume / cancel
@@ -16,17 +17,25 @@ interface StatusActionsProps {
   id: string;
   name: string;
   status: SubscriptionStatus;
+  lang?: Lang;
 }
 
-export default function StatusActions({ id, name, status }: StatusActionsProps) {
+// lifecycle.ts stays the single canonical (English) source of transitions;
+// this map only localizes the DISPLAY of its labels.
+const ACTION_LABEL_KEYS: Record<string, MessageKey> = {
+  Pause: "act.pause",
+  Resume: "act.resume",
+  Cancel: "act.cancel",
+  Reactivate: "act.reactivate",
+};
+
+export default function StatusActions({ id, name, status, lang = "en" }: StatusActionsProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = translator(lang);
 
   async function changeStatus(target: SubscriptionStatus, confirm: boolean) {
-    if (
-      confirm &&
-      !window.confirm(`Cancel "${name}"? It stays in your list as cancelled and leaves totals and renewals.`)
-    ) {
+    if (confirm && !window.confirm(`${t("act.cancelConfirm.pre")}${name}${t("act.cancelConfirm.post")}`)) {
       return;
     }
 
@@ -54,9 +63,9 @@ export default function StatusActions({ id, name, status }: StatusActionsProps) 
         window.location.reload();
         return;
       }
-      setError("Could not update status. Please try again.");
+      setError(t("act.err.status"));
     } catch {
-      setError("Could not reach the server. Please try again.");
+      setError(t("f.err.network"));
     }
     setPending(false);
   }
@@ -74,7 +83,7 @@ export default function StatusActions({ id, name, status }: StatusActionsProps) 
             void changeStatus(action.target, action.confirm);
           }}
         >
-          {action.label}
+          {t(ACTION_LABEL_KEYS[action.label] ?? "act.pause")}
         </Button>
       ))}
       {error && (

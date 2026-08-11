@@ -2,23 +2,24 @@
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
 import { missingConfigs } from "@/lib/config-status";
+import { getLang, translator } from "@/lib/i18n";
 
 interface Props {
   title?: string;
 }
 
+const lang = getLang(Astro.cookies);
+const t = translator(lang);
+
 const { title = "SubTrack — know what your subscriptions really cost" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta
-      name="description"
-      content="Track every subscription in one place: true monthly and yearly totals across mixed billing cycles, plus exact upcoming renewal dates."
-    />
+    <meta name="description" content={t("meta.description")} />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
     <script is:inline>
@@ -33,12 +34,23 @@ const { title = "SubTrack — know what your subscriptions really cost" } = Astr
         const dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
         document.documentElement.classList.toggle("dark", dark);
         window.addEventListener("click", (event) => {
-          if (!(event.target instanceof Element) || !event.target.closest("[data-theme-toggle]")) return;
-          const isDark = document.documentElement.classList.toggle("dark");
-          try {
-            localStorage.setItem("subtrack-theme", isDark ? "dark" : "light");
-          } catch {
-            /* storage blocked — theme still toggles for this page */
+          if (!(event.target instanceof Element)) return;
+          if (event.target.closest("[data-theme-toggle]")) {
+            const isDark = document.documentElement.classList.toggle("dark");
+            try {
+              localStorage.setItem("subtrack-theme", isDark ? "dark" : "light");
+            } catch {
+              /* storage blocked — theme still toggles for this page */
+            }
+            return;
+          }
+          const langButton = event.target.closest("[data-lang-toggle]");
+          if (langButton) {
+            // Language lives in a cookie (not localStorage) so SSR renders the
+            // right strings on the very next request; reload re-renders now.
+            const next = langButton.getAttribute("data-lang-toggle");
+            document.cookie = "subtrack-lang=" + next + "; path=/; max-age=31536000; samesite=lax";
+            window.location.reload();
           }
         });
       })();
@@ -49,7 +61,7 @@ const { title = "SubTrack — know what your subscriptions really cost" } = Astr
       href="#main"
       class="bg-primary text-primary-foreground absolute -top-12 left-2 z-50 rounded-lg px-4 py-2 font-semibold transition-[top] focus-visible:top-2"
     >
-      Skip to content
+      {t("skip")}
     </a>
     {
       missingConfigs.map((cfg) => (

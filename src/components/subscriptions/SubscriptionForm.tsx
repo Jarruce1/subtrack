@@ -13,6 +13,7 @@ import {
   SUBSCRIPTION_STATUSES,
   subscriptionCreateSchema,
 } from "@/lib/validation/subscriptions";
+import { categoryLabel, statusLabel, translator, type Lang } from "@/lib/i18n";
 import type { Subscription } from "@/types";
 
 // FR-004/FR-006 subscription form, dual-mode (S-03 generalization of the S-01
@@ -33,20 +34,21 @@ interface ErrorPayload {
   error?: string;
 }
 
-const CYCLE_LABELS: Record<(typeof BILLING_CYCLES)[number], string> = {
-  weekly: "Weekly",
-  monthly: "Monthly",
-  yearly: "Yearly",
-  custom: "Custom (every N months)",
-};
-
 interface SubscriptionFormProps {
   /** Row to edit; omit for add mode. */
   subscription?: Subscription;
+  lang?: Lang;
 }
 
-export default function SubscriptionForm({ subscription }: SubscriptionFormProps) {
+export default function SubscriptionForm({ subscription, lang = "en" }: SubscriptionFormProps) {
   const isEdit = subscription !== undefined;
+  const t = translator(lang);
+  const CYCLE_LABELS: Record<(typeof BILLING_CYCLES)[number], string> = {
+    weekly: t("cycle.weekly"),
+    monthly: t("cycle.monthly"),
+    yearly: t("cycle.yearly"),
+    custom: t("cycle.custom"),
+  };
 
   const [name, setName] = useState(subscription?.name ?? "");
   const [amount, setAmount] = useState(subscription ? String(subscription.amount) : "");
@@ -163,20 +165,20 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
         return;
       }
       if (isEdit && response.status === 404) {
-        setFormErrors(["This subscription no longer exists."]);
+        setFormErrors([t("f.err.gone")]);
         return;
       }
       if (response.status === 400) {
         const data = (await response.json()) as ErrorPayload;
         setFieldErrors(data.errors?.fieldErrors ?? {});
         setFormErrors(
-          data.errors?.formErrors?.length ? data.errors.formErrors : data.error ? [data.error] : ["Invalid input."],
+          data.errors?.formErrors?.length ? data.errors.formErrors : data.error ? [data.error] : [t("f.err.invalid")],
         );
         return;
       }
-      setFormErrors(["Something went wrong while saving. Please try again."]);
+      setFormErrors([t("f.err.save")]);
     } catch {
-      setFormErrors(["Could not reach the server. Please try again."]);
+      setFormErrors([t("f.err.network")]);
     } finally {
       setSubmitting(false);
     }
@@ -194,7 +196,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
       noValidate
       className="space-y-4"
     >
-      <Field id="name" label="Name" error={fieldError("name")}>
+      <Field id="name" label={t("f.name")} error={fieldError("name")}>
         <Input
           id="name"
           value={name}
@@ -212,7 +214,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field id="amount" label="Amount" error={fieldError("amount")}>
+        <Field id="amount" label={t("f.amount")} error={fieldError("amount")}>
           <Input
             id="amount"
             type="number"
@@ -229,7 +231,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
           />
         </Field>
 
-        <Field id="currency" label="Currency" error={fieldError("currency")}>
+        <Field id="currency" label={t("f.currency")} error={fieldError("currency")}>
           <Input
             id="currency"
             value={currency}
@@ -245,7 +247,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field id="billing_cycle" label="Billing cycle" error={fieldError("billing_cycle")}>
+        <Field id="billing_cycle" label={t("f.cycle")} error={fieldError("billing_cycle")}>
           <Select
             value={billingCycle}
             onValueChange={(value) => {
@@ -255,7 +257,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
             }}
           >
             <SelectTrigger id="billing_cycle" className="w-full" aria-invalid={Boolean(fieldError("billing_cycle"))}>
-              <SelectValue placeholder="Pick a billing cycle" />
+              <SelectValue placeholder={t("f.cycle.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {BILLING_CYCLES.map((cycle) => (
@@ -268,7 +270,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
         </Field>
 
         {billingCycle === "custom" && (
-          <Field id="billing_interval_months" label="Every N months" error={fieldError("billing_interval_months")}>
+          <Field id="billing_interval_months" label={t("f.interval")} error={fieldError("billing_interval_months")}>
             <Input
               id="billing_interval_months"
               type="number"
@@ -289,7 +291,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
         )}
       </div>
 
-      <Field id="start_date" label="Start date" error={fieldError("start_date")}>
+      <Field id="start_date" label={t("f.startDate")} error={fieldError("start_date")}>
         <Input
           id="start_date"
           type="date"
@@ -303,7 +305,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
       </Field>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field id="category" label="Category" error={fieldError("category")}>
+        <Field id="category" label={t("f.category")} error={fieldError("category")}>
           <Select
             value={category}
             onValueChange={(value) => {
@@ -312,19 +314,19 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
             }}
           >
             <SelectTrigger id="category" className="w-full" aria-invalid={Boolean(fieldError("category"))}>
-              <SelectValue placeholder="Pick a category" />
+              <SelectValue placeholder={t("f.category.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {SUBSCRIPTION_CATEGORIES.map((item) => (
                 <SelectItem key={item} value={item}>
-                  {item}
+                  {categoryLabel(lang, item)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </Field>
 
-        <Field id="status" label="Status" error={fieldError("status")}>
+        <Field id="status" label={t("f.status")} error={fieldError("status")}>
           <Select
             value={status}
             onValueChange={(value) => {
@@ -333,12 +335,12 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
             }}
           >
             <SelectTrigger id="status" className="w-full" aria-invalid={Boolean(fieldError("status"))}>
-              <SelectValue placeholder="Pick a status" />
+              <SelectValue placeholder={t("f.status.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {SUBSCRIPTION_STATUSES.map((item) => (
                 <SelectItem key={item} value={item}>
-                  {item}
+                  {statusLabel(lang, item)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -346,7 +348,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
         </Field>
       </div>
 
-      <Field id="note" label="Note (optional)" error={fieldError("note")}>
+      <Field id="note" label={t("f.note")} error={fieldError("note")}>
         <Textarea
           id="note"
           value={note}
@@ -356,7 +358,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
             setNote(e.target.value);
             clearFieldError("note");
           }}
-          placeholder="Family plan, shared with…"
+          placeholder={t("f.note.placeholder")}
           aria-invalid={Boolean(fieldError("note"))}
         />
       </Field>
@@ -366,8 +368,9 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
           role="status"
           className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200"
         >
-          You already track a subscription named &ldquo;{duplicateWarning}&rdquo;. You can save anyway &mdash;
-          duplicates are allowed.
+          {t("f.dup.pre")}
+          {duplicateWarning}
+          {t("f.dup.post")}
         </div>
       )}
 
@@ -384,12 +387,12 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
 
       <Button type="submit" disabled={submitting} className="w-full">
         {submitting
-          ? "Saving…"
+          ? t("f.save.pending")
           : duplicateWarning !== null
-            ? "Save anyway"
+            ? t("f.save.anyway")
             : isEdit
-              ? "Save changes"
-              : "Add subscription"}
+              ? t("f.save.changes")
+              : t("f.save.add")}
       </Button>
     </form>
   );

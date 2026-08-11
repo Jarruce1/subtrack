@@ -4,12 +4,15 @@ import { FormField } from "@/components/auth/FormField";
 import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { ServerError } from "@/components/auth/ServerError";
+import { translator, type Lang } from "@/lib/i18n";
 
 interface Props {
   serverError?: string | null;
+  lang?: Lang;
 }
 
-export default function SignInForm({ serverError }: Props) {
+export default function SignInForm({ serverError, lang = "en" }: Props) {
+  const t = translator(lang);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -18,12 +21,12 @@ export default function SignInForm({ serverError }: Props) {
   function validate() {
     const next: typeof errors = {};
     if (!email.trim()) {
-      next.email = "Email is required";
+      next.email = t("auth.err.emailRequired");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next.email = "Enter a valid email address";
+      next.email = t("auth.err.emailInvalid");
     }
     if (!password) {
-      next.password = "Password is required";
+      next.password = t("auth.err.passwordRequired");
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -44,32 +47,34 @@ export default function SignInForm({ serverError }: Props) {
       <FormField
         id="email"
         type="email"
-        label="Email"
+        label={t("auth.email")}
         value={email}
         onChange={(v) => {
           setEmail(v);
           clearError("email");
         }}
-        placeholder="you@example.com"
+        placeholder={t("auth.email.placeholder")}
         error={errors.email}
         icon={<Mail className="size-4" />}
       />
 
       <FormField
         id="password"
-        label="Password"
+        label={t("auth.password")}
         type={showPassword ? "text" : "password"}
         value={password}
         onChange={(v) => {
           setPassword(v);
           clearError("password");
         }}
-        placeholder="Your password"
+        placeholder={t("auth.password.placeholder")}
         error={errors.password}
         icon={<Lock className="size-4" />}
         endContent={
           <PasswordToggle
             visible={showPassword}
+            showLabel={t("auth.show")}
+            hideLabel={t("auth.hide")}
             onToggle={() => {
               setShowPassword(!showPassword);
             }}
@@ -79,8 +84,8 @@ export default function SignInForm({ serverError }: Props) {
 
       <ServerError message={serverError} />
 
-      <SubmitButton pendingText="Signing in..." icon={<LogIn className="size-4" />}>
-        Sign in
+      <SubmitButton pendingText={t("auth.signin.pending")} icon={<LogIn className="size-4" />}>
+        {t("auth.signin.title")}
       </SubmitButton>
     </form>
   );

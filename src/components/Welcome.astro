@@ -1,7 +1,10 @@
 ---
 import Topbar from "@/components/Topbar.astro";
+import { getLang, translator } from "@/lib/i18n";
 
 const { user } = Astro.locals;
+const lang = getLang(Astro.cookies);
+const t = translator(lang);
 
 const featureIcon = "mb-3 text-link";
 ---
@@ -13,14 +16,14 @@ const featureIcon = "mb-3 text-link";
     <p
       class="text-link border-success-border bg-accent mb-6 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-widest uppercase"
     >
-      Subscription cost &amp; renewal tracker
+      {t("land.badge")}
     </p>
     <h1 class="max-w-[18ch] text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl">
-      Know what your subscriptions <span class="text-link">really cost</span>
+      {t("land.title.pre")}
+      <span class="text-link">{t("land.title.highlight")}</span>
     </h1>
     <p class="text-muted-foreground mt-5 max-w-2xl text-lg sm:text-xl">
-      Streaming, SaaS, gym, cloud storage &mdash; every cycle normalized to one true monthly and yearly total, with
-      every renewal date computed exactly. No spreadsheet, no surprises.
+      {t("land.lead")}
     </p>
     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
       {
@@ -29,7 +32,7 @@ const featureIcon = "mb-3 text-link";
             href="/dashboard"
             class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-11 items-center justify-center rounded-lg px-6 py-2.5 text-base font-semibold transition-colors"
           >
-            Go to dashboard
+            {t("land.cta.dashboard")}
           </a>
         ) : (
           <>
@@ -37,13 +40,13 @@ const featureIcon = "mb-3 text-link";
               href="/auth/signup"
               class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-11 items-center justify-center rounded-lg px-6 py-2.5 text-base font-semibold transition-colors"
             >
-              Start tracking &mdash; it's free
+              {t("land.cta.start")}
             </a>
             <a
               href="/auth/signin"
               class="border-input bg-card hover:bg-accent hover:border-ring inline-flex min-h-11 items-center justify-center rounded-lg border px-6 py-2.5 text-base font-semibold transition-colors"
             >
-              Sign in
+              {t("land.cta.signin")}
             </a>
           </>
         )
@@ -52,22 +55,28 @@ const featureIcon = "mb-3 text-link";
 
     <div
       class="border-border bg-card mt-14 flex flex-wrap justify-center gap-x-9 gap-y-5 rounded-2xl border px-7 py-5 shadow-sm"
-      aria-label="Example dashboard summary"
+      aria-label={t("land.summary.aria")}
     >
       <div class="flex flex-col text-left">
-        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Monthly total</span>
+        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          {t("land.summary.monthly")}
+        </span>
         <span class="text-2xl font-bold tabular-nums">PLN 187.46</span>
-        <span class="text-muted-foreground text-sm">12 active subscriptions</span>
+        <span class="text-muted-foreground text-sm">{t("land.summary.monthly.sub")}</span>
       </div>
       <div class="flex flex-col text-left">
-        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Yearly total</span>
+        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          {t("land.summary.yearly")}
+        </span>
         <span class="text-2xl font-bold tabular-nums">PLN 2,249.52</span>
-        <span class="text-muted-foreground text-sm">across all cycles</span>
+        <span class="text-muted-foreground text-sm">{t("land.summary.yearly.sub")}</span>
       </div>
       <div class="flex flex-col text-left">
-        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Next renewal</span>
-        <span class="text-2xl font-bold tabular-nums">Aug 15</span>
-        <span class="text-muted-foreground text-sm">Netflix &middot; PLN 43.00</span>
+        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          {t("land.summary.next")}
+        </span>
+        <span class="text-2xl font-bold tabular-nums">{t("land.summary.next.value")}</span>
+        <span class="text-muted-foreground text-sm">{t("land.summary.next.sub")}</span>
       </div>
     </div>
   </div>
@@ -89,10 +98,9 @@ const featureIcon = "mb-3 text-link";
         <line x1="12" y1="2" x2="12" y2="22"></line>
         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
       </svg>
-      <h2 class="mb-2 text-lg font-semibold">One true total</h2>
+      <h2 class="mb-2 text-lg font-semibold">{t("land.f1.title")}</h2>
       <p class="text-muted-foreground text-sm leading-relaxed">
-        Weekly, monthly, yearly, every-3-months &mdash; mixed billing cycles normalized into a single monthly and yearly
-        cost you can trust.
+        {t("land.f1.body")}
       </p>
     </div>
 
@@ -115,10 +123,9 @@ const featureIcon = "mb-3 text-link";
         <path d="M3 10h18"></path>
         <path d="m9 16 2 2 4-4"></path>
       </svg>
-      <h2 class="mb-2 text-lg font-semibold">Never miss a renewal</h2>
+      <h2 class="mb-2 text-lg font-semibold">{t("land.f2.title")}</h2>
       <p class="text-muted-foreground text-sm leading-relaxed">
-        Exact next-renewal dates &mdash; month-end and leap-year cases included &mdash; plus a 30-day upcoming list so
-        you can cancel before you're charged.
+        {t("land.f2.body")}
       </p>
     </div>
 
@@ -138,9 +145,9 @@ const featureIcon = "mb-3 text-link";
         <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
       </svg>
-      <h2 class="mb-2 text-lg font-semibold">Private by design</h2>
+      <h2 class="mb-2 text-lg font-semibold">{t("land.f3.title")}</h2>
       <p class="text-muted-foreground text-sm leading-relaxed">
-        Your account, your data &mdash; enforced at the database level. Nobody else ever sees what you pay for.
+        {t("land.f3.body")}
       </p>
     </div>
   </div>

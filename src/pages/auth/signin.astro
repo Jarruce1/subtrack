@@ -3,19 +3,23 @@ import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import SignInForm from "@/components/auth/SignInForm";
 import { authErrorMessage } from "@/lib/auth-errors";
+import { getLang, translator } from "@/lib/i18n";
 
 // ?error= carries a short code (see auth-errors.ts) — never free text.
 const error = authErrorMessage(Astro.url.searchParams.get("error"));
+const lang = getLang(Astro.cookies);
+const t = translator(lang);
 ---
 
-<Layout title="Sign in — SubTrack">
+<Layout title={`${t("auth.signin.title")} — SubTrack`}>
   <Topbar />
   <main id="main" class="flex min-h-[calc(100vh-8rem)] items-center justify-center p-4">
     <div class="border-border bg-card w-full max-w-sm rounded-2xl border p-8 shadow-sm">
-      <h1 class="mb-6 text-center text-2xl font-bold tracking-tight">Sign in</h1>
-      <SignInForm serverError={error} client:load />
+      <h1 class="mb-6 text-center text-2xl font-bold tracking-tight">{t("auth.signin.title")}</h1>
+      <SignInForm serverError={error} lang={lang} client:load />
       <p class="text-muted-foreground mt-4 text-center text-sm">
-        Don't have an account? <a href="/auth/signup" class="text-link underline-offset-3 hover:underline">Sign up</a>
+        {t("auth.signin.noAccount")}{" "}
+        <a href="/auth/signup" class="text-link underline-offset-3 hover:underline">{t("nav.signup")}</a>
       </p>
     </div>
   </main>

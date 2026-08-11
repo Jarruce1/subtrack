@@ -4,14 +4,17 @@ import { FormField } from "@/components/auth/FormField";
 import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { ServerError } from "@/components/auth/ServerError";
+import { translator, type Lang } from "@/lib/i18n";
 
 const MIN_PASSWORD_LENGTH = 6;
 
 interface Props {
   serverError?: string | null;
+  lang?: Lang;
 }
 
-export default function SignUpForm({ serverError }: Props) {
+export default function SignUpForm({ serverError, lang = "en" }: Props) {
+  const t = translator(lang);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,21 +26,21 @@ export default function SignUpForm({ serverError }: Props) {
     const next: typeof errors = {};
 
     if (!email.trim()) {
-      next.email = "Email is required";
+      next.email = t("auth.err.emailRequired");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next.email = "Enter a valid email address";
+      next.email = t("auth.err.emailInvalid");
     }
 
     if (!password) {
-      next.password = "Password is required";
+      next.password = t("auth.err.passwordRequired");
     } else if (password.length < MIN_PASSWORD_LENGTH) {
-      next.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
+      next.password = t("auth.err.passwordMin");
     }
 
     if (!confirmPassword) {
-      next.confirmPassword = "Please confirm your password";
+      next.confirmPassword = t("auth.err.confirmRequired");
     } else if (password !== confirmPassword) {
-      next.confirmPassword = "Passwords do not match";
+      next.confirmPassword = t("auth.err.confirmMismatch");
     }
 
     setErrors(next);
@@ -57,8 +60,11 @@ export default function SignUpForm({ serverError }: Props) {
   const passwordHint =
     !errors.password && password.length > 0 && password.length < MIN_PASSWORD_LENGTH ? (
       <p className="text-muted-foreground mt-1 text-xs">
-        {MIN_PASSWORD_LENGTH - password.length} more character
-        {MIN_PASSWORD_LENGTH - password.length !== 1 ? "s" : ""} needed
+        {lang === "pl"
+          ? `Brakuje jeszcze ${String(MIN_PASSWORD_LENGTH - password.length)} zn.`
+          : `${String(MIN_PASSWORD_LENGTH - password.length)} more character${
+              MIN_PASSWORD_LENGTH - password.length !== 1 ? "s" : ""
+            } needed`}
       </p>
     ) : undefined;
 
@@ -67,33 +73,35 @@ export default function SignUpForm({ serverError }: Props) {
       <FormField
         id="email"
         type="email"
-        label="Email"
+        label={t("auth.email")}
         value={email}
         onChange={(v) => {
           setEmail(v);
           clearError("email");
         }}
-        placeholder="you@example.com"
+        placeholder={t("auth.email.placeholder")}
         error={errors.email}
         icon={<Mail className="size-4" />}
       />
 
       <FormField
         id="password"
-        label="Password"
+        label={t("auth.password")}
         type={showPassword ? "text" : "password"}
         value={password}
         onChange={(v) => {
           setPassword(v);
           clearError("password");
         }}
-        placeholder="Min. 6 characters"
+        placeholder={t("auth.password.min.placeholder")}
         error={errors.password}
         hint={passwordHint}
         icon={<Lock className="size-4" />}
         endContent={
           <PasswordToggle
             visible={showPassword}
+            showLabel={t("auth.show")}
+            hideLabel={t("auth.hide")}
             onToggle={() => {
               setShowPassword(!showPassword);
             }}
@@ -104,19 +112,21 @@ export default function SignUpForm({ serverError }: Props) {
       <FormField
         id="confirmPassword"
         name="confirmPassword"
-        label="Confirm password"
+        label={t("auth.confirm")}
         type={showConfirmPassword ? "text" : "password"}
         value={confirmPassword}
         onChange={(v) => {
           setConfirmPassword(v);
           clearError("confirmPassword");
         }}
-        placeholder="Re-enter your password"
+        placeholder={t("auth.confirm.placeholder")}
         error={errors.confirmPassword}
         icon={<Lock className="size-4" />}
         endContent={
           <PasswordToggle
             visible={showConfirmPassword}
+            showLabel={t("auth.show")}
+            hideLabel={t("auth.hide")}
             onToggle={() => {
               setShowConfirmPassword(!showConfirmPassword);
             }}
@@ -126,8 +136,8 @@ export default function SignUpForm({ serverError }: Props) {
 
       <ServerError message={serverError} />
 
-      <SubmitButton pendingText="Creating account..." icon={<UserPlus className="size-4" />}>
-        Create account
+      <SubmitButton pendingText={t("auth.signup.pending")} icon={<UserPlus className="size-4" />}>
+        {t("auth.signup.submit")}
       </SubmitButton>
     </form>
   );

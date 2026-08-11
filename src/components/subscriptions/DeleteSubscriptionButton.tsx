@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { translator, type Lang } from "@/lib/i18n";
 
 // FR-007 delete-with-confirmation. The only interactivity the list page needs:
 // window.confirm (dependency-free, accessible), DELETE to the item route, then
@@ -9,14 +10,16 @@ import { Button } from "@/components/ui/button";
 interface DeleteSubscriptionButtonProps {
   id: string;
   name: string;
+  lang?: Lang;
 }
 
-export default function DeleteSubscriptionButton({ id, name }: DeleteSubscriptionButtonProps) {
+export default function DeleteSubscriptionButton({ id, name, lang = "en" }: DeleteSubscriptionButtonProps) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = translator(lang);
 
   async function handleDelete() {
-    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) {
+    if (!window.confirm(`${t("del.confirm.pre")}${name}${t("del.confirm.post")}`)) {
       return;
     }
 
@@ -40,9 +43,9 @@ export default function DeleteSubscriptionButton({ id, name }: DeleteSubscriptio
         window.location.reload();
         return;
       }
-      setError("Could not delete. Please try again.");
+      setError(t("del.err"));
     } catch {
-      setError("Could not reach the server. Please try again.");
+      setError(t("f.err.network"));
     }
     setDeleting(false);
   }
@@ -58,7 +61,7 @@ export default function DeleteSubscriptionButton({ id, name }: DeleteSubscriptio
           void handleDelete();
         }}
       >
-        {deleting ? "Deleting…" : "Delete"}
+        {deleting ? t("del.pending") : t("del.button")}
       </Button>
       {error && (
         <span role="alert" className="text-destructive text-xs">

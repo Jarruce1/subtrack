@@ -1,11 +1,13 @@
 ---
 import type { SubscriptionStatus } from "@/types";
+import { getLang, statusLabel } from "@/lib/i18n";
 
 interface Props {
   status: SubscriptionStatus;
 }
 
 const { status } = Astro.props;
+const label = statusLabel(getLang(Astro.cookies), status);
 
 // Dot + label — status is never conveyed by color alone (WCAG 1.4.1).
 const styles: Record<SubscriptionStatus, string> = {
@@ -21,5 +23,5 @@ const styles: Record<SubscriptionStatus, string> = {
     styles[status],
   ]}
 >
-  <span class="size-1.5 rounded-full bg-current" aria-hidden="true"></span>{status}
+  <span class="size-1.5 rounded-full bg-current" aria-hidden="true"></span>{label}
 </span>
