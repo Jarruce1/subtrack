@@ -42,7 +42,7 @@ const rows = subscriptions.map((subscription) => ({
             <h1 class="text-3xl font-bold tracking-tight">{t("subs.title")}</h1>
             <a
               href="/subscriptions/new"
-              class="bg-primary text-primary-foreground hover:bg-primary-hover rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
+              class="bg-primary text-primary-foreground hover:bg-primary-hover rounded-full px-4 py-2 text-sm font-semibold transition-colors"
             >
               {t("dash.add")}
             </a>
@@ -54,7 +54,7 @@ const rows = subscriptions.map((subscription) => ({
               <p class="text-muted-foreground mx-auto mt-2 max-w-md text-sm">{t("subs.empty.body")}</p>
               <a
                 href="/subscriptions/new"
-                class="bg-primary text-primary-foreground hover:bg-primary-hover mt-6 inline-block rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors"
+                class="bg-primary text-primary-foreground hover:bg-primary-hover mt-6 inline-block rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
               >
                 {t("dash.empty.cta")}
               </a>
@@ -97,7 +97,7 @@ const rows = subscriptions.map((subscription) => ({
                       />
                       <a
                         href={`/subscriptions/${subscription.id}/edit`}
-                        class="border-input bg-card hover:bg-accent hover:border-ring rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+                        class="border-input bg-card hover:bg-accent hover:border-ring rounded-full border px-3 py-1.5 text-sm font-medium transition-colors"
                       >
                         {t("subs.edit")}
                       </a>

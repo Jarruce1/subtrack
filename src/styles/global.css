@@ -4,115 +4,115 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * SubTrack palette — teal on neutral, WCAG AA verified pairs.
- * Contrast (light): foreground 15.6:1, muted-foreground 7.6:1, white-on-primary
- * 5.5:1, link 5.9:1, white-on-destructive 6.5:1.
- * Contrast (dark): foreground 14.5:1, muted-foreground 7.6:1,
- * primary-foreground-on-primary 9.7:1, link 8.9:1.
- * Full annotated palette: Claude Design project "SubTrack Design System".
+ * SubTrack palette v3 "Warm Editorial" — ivory + ink + terracotta with serif
+ * display headings. WCAG AA verified pairs (light): foreground 15.2:1,
+ * muted-foreground 7.6:1, link 6.7:1; (dark): foreground 13.9:1, link 8.6:1.
+ * Annotated palette + view mockups: Claude Design project
+ * "SubTrack Design System", group "v3 Warm Editorial".
  */
 :root {
   color-scheme: light;
-  --radius: 0.625rem;
-  --background: #fafbfc;
-  --foreground: #16232e;
-  --card: #ffffff;
-  --card-foreground: #16232e;
-  --popover: #ffffff;
-  --popover-foreground: #16232e;
-  --primary: #0f766e;
-  --primary-hover: #115e59;
-  --primary-foreground: #ffffff;
-  --secondary: #eceff2;
-  --secondary-foreground: #16232e;
-  --muted: #eceff2;
-  --muted-foreground: #4a5a68;
-  --accent: #e6f4f2;
-  --accent-foreground: #0b5d56;
-  --destructive: #b91c1c;
+  --radius: 0.75rem;
+  --background: #faf6f0;
+  --foreground: #1f1e1b;
+  --card: #fffdf9;
+  --card-foreground: #1f1e1b;
+  --popover: #fffdf9;
+  --popover-foreground: #1f1e1b;
+  --primary: #1f1e1b;
+  --primary-hover: #9c4526;
+  --primary-foreground: #faf6f0;
+  --secondary: #f3ece2;
+  --secondary-foreground: #1f1e1b;
+  --muted: #f3ece2;
+  --muted-foreground: #565044;
+  --accent: #f4ded2;
+  --accent-foreground: #9c4526;
+  --destructive: #a03123;
   --destructive-foreground: #ffffff;
-  --border: #dde4ea;
-  --input: #b9c4cd;
-  --ring: #0f9b8f;
-  --link: #0c6e66;
-  --grad-a: #0f766e;
-  --grad-b: #1d4ed8;
-  --dot: #d3dde4;
-  --accent-soft-border: #9ed6cf;
-  --success-soft: #e6f4f2;
-  --success-text: #0b5d56;
-  --success-border: #9ed6cf;
-  --warning-soft: #fdf1dc;
+  --border: #e4dbcd;
+  --input: #c9bda9;
+  --ring: #c15f3c;
+  --link: #9c4526;
+  --grad-a: #c15f3c;
+  --grad-b: #d9a53f;
+  --dot: #ded3c2;
+  --accent-soft-border: #e0b8a2;
+  --success-soft: #e2e8d8;
+  --success-text: #5f7150;
+  --success-border: #93a682;
+  --warning-soft: #f5e8cd;
   --warning-text: #7a5410;
   --warning-border: #d9a53f;
-  --error-soft: #fdecec;
-  --error-text: #a01717;
-  --chart-1: #0f766e;
-  --chart-2: #2563eb;
-  --chart-3: #b45309;
-  --chart-4: #7c3aed;
-  --chart-5: #be185d;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #16232e;
-  --sidebar-primary: #0f766e;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e6f4f2;
-  --sidebar-accent-foreground: #0b5d56;
-  --sidebar-border: #dde4ea;
-  --sidebar-ring: #0f9b8f;
+  --error-soft: #f7ded9;
+  --error-text: #a03123;
+  --chart-1: #c15f3c;
+  --chart-2: #5f7150;
+  --chart-3: #4e5f6e;
+  --chart-4: #d9a53f;
+  --chart-5: #8a5a83;
+  --sidebar: #fffdf9;
+  --sidebar-foreground: #1f1e1b;
+  --sidebar-primary: #1f1e1b;
+  --sidebar-primary-foreground: #faf6f0;
+  --sidebar-accent: #f4ded2;
+  --sidebar-accent-foreground: #9c4526;
+  --sidebar-border: #e4dbcd;
+  --sidebar-ring: #c15f3c;
 }
 
 .dark {
   color-scheme: dark;
-  --background: #0f141a;
-  --foreground: #e8edf2;
-  --card: #161d25;
-  --card-foreground: #e8edf2;
-  --popover: #161d25;
-  --popover-foreground: #e8edf2;
-  --primary: #2dd4bf;
-  --primary-hover: #5eead4;
-  --primary-foreground: #0c1a18;
-  --secondary: #232c36;
-  --secondary-foreground: #e8edf2;
-  --muted: #232c36;
-  --muted-foreground: #a7b4c0;
-  --accent: #12312e;
-  --accent-foreground: #6fdccb;
-  --destructive: #f87171;
-  --destructive-foreground: #2a0808;
-  --border: #2a3542;
-  --input: #435363;
-  --ring: #3ddcc7;
-  --link: #4fd8c6;
-  --grad-a: #2dd4bf;
-  --grad-b: #60a5fa;
-  --dot: #223040;
-  --accent-soft-border: #1e6b62;
-  --success-soft: #10302c;
-  --success-text: #6fdccb;
-  --success-border: #1e6b62;
-  --warning-soft: #33270f;
-  --warning-text: #ecc56a;
+  --background: #191612;
+  --foreground: #ece5d8;
+  --card: #241f1a;
+  --card-foreground: #ece5d8;
+  --popover: #241f1a;
+  --popover-foreground: #ece5d8;
+  --primary: #ece5d8;
+  --primary-hover: #e08d6d;
+  --primary-foreground: #191612;
+  --secondary: #2b251e;
+  --secondary-foreground: #ece5d8;
+  --muted: #2b251e;
+  --muted-foreground: #b3a894;
+  --accent: #3a2a20;
+  --accent-foreground: #eba98d;
+  --destructive: #e79a8e;
+  --destructive-foreground: #2a0f0a;
+  --border: #3a332a;
+  --input: #574c3e;
+  --ring: #e08d6d;
+  --link: #eba98d;
+  --grad-a: #e08d6d;
+  --grad-b: #e3bf78;
+  --dot: #2e2820;
+  --accent-soft-border: #6b4a38;
+  --success-soft: #2a3122;
+  --success-text: #a9bd97;
+  --success-border: #5c6b4d;
+  --warning-soft: #322815;
+  --warning-text: #e3bf78;
   --warning-border: #8a6a1f;
-  --error-soft: #371313;
-  --error-text: #f1a1a1;
-  --chart-1: #2dd4bf;
-  --chart-2: #60a5fa;
-  --chart-3: #fbbf24;
-  --chart-4: #a78bfa;
-  --chart-5: #f472b6;
-  --sidebar: #161d25;
-  --sidebar-foreground: #e8edf2;
-  --sidebar-primary: #2dd4bf;
-  --sidebar-primary-foreground: #0c1a18;
-  --sidebar-accent: #12312e;
-  --sidebar-accent-foreground: #6fdccb;
-  --sidebar-border: #2a3542;
-  --sidebar-ring: #3ddcc7;
+  --error-soft: #3a201b;
+  --error-text: #e79a8e;
+  --chart-1: #e08d6d;
+  --chart-2: #a9bd97;
+  --chart-3: #a6b6c2;
+  --chart-4: #e3bf78;
+  --chart-5: #c79ac0;
+  --sidebar: #241f1a;
+  --sidebar-foreground: #ece5d8;
+  --sidebar-primary: #ece5d8;
+  --sidebar-primary-foreground: #191612;
+  --sidebar-accent: #3a2a20;
+  --sidebar-accent-foreground: #eba98d;
+  --sidebar-border: #3a332a;
+  --sidebar-ring: #e08d6d;
 }
 
 @theme inline {
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -161,7 +161,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Soft teal wash behind the landing hero; theme-aware. */
+/* Soft warm wash behind the landing hero; theme-aware. */
 @utility bg-hero-wash {
   background-image: radial-gradient(60% 50% at 50% 0%, var(--accent) 0%, transparent 70%);
 }
@@ -175,6 +175,24 @@
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+}
+
+/* Paper grain overlay for illustration surfaces. */
+@utility grain {
+  position: relative;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+.dark .grain::after {
+  mix-blend-mode: screen;
+  opacity: 0.5;
 }
 
 /* Subtle dot texture layered under the hero wash. */
@@ -191,7 +209,7 @@
     border-color 160ms;
 }
 .card-lift:hover {
-  box-shadow: 0 6px 24px rgb(15 118 110 / 0.14);
+  box-shadow: 0 6px 24px rgb(31 30 27 / 0.12);
   transform: translateY(-1px);
   border-color: var(--accent-soft-border, var(--ring));
 }
@@ -202,6 +220,13 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+  }
+  /* Editorial voice: serif display for headings; body stays sans. */
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    letter-spacing: 0.005em;
+    font-weight: 600;
   }
   /* WCAG 2.4.7: focus always visible, on every interactive element. */
   :focus-visible {
