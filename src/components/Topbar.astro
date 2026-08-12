@@ -61,9 +61,26 @@ const current = (href: string) => (path === href || path.startsWith(`${href}/`) 
       type="button"
       data-lang-toggle={nextLang}
       aria-label={t("nav.lang")}
-      class="border-input bg-card text-foreground hover:border-ring ml-1 inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border px-2.5 text-sm font-semibold uppercase transition-colors"
+      class="border-input bg-card hover:border-ring ml-1 inline-flex h-10 cursor-pointer items-stretch overflow-hidden rounded-lg border text-xs font-bold transition-colors"
     >
-      {nextLang}
+      <span
+        aria-hidden="true"
+        class:list={[
+          "flex items-center px-2.5",
+          lang === "en" ? "bg-secondary text-foreground" : "text-muted-foreground/70",
+        ]}
+      >
+        EN
+      </span>
+      <span
+        aria-hidden="true"
+        class:list={[
+          "flex items-center px-2.5",
+          lang === "pl" ? "bg-secondary text-foreground" : "text-muted-foreground/70",
+        ]}
+      >
+        PL
+      </span>
     </button>
     <button
       type="button"

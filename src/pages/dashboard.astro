@@ -47,6 +47,13 @@ for (const row of categoryTotals) {
   }
 }
 const upcoming = upcomingRenewals(subscriptions, today);
+// Share-of-spend bars (decoration): each category row's monthly cost as a
+// fraction of its currency's active monthly total.
+const totalsByCurrency = new Map(totals.map((total) => [total.currency, total.monthly]));
+const shareOf = (currency: string, monthly: number): number => {
+  const total = totalsByCurrency.get(currency);
+  return total && total > 0 ? Math.max(2, Math.round((monthly / total) * 100)) : 0;
+};
 const rows = subscriptions.map((subscription) => ({
   subscription,
   normalized: normalizeCost(subscription.amount, subscription.billing_cycle, subscription.billing_interval_months),
@@ -110,10 +117,12 @@ const rows = subscriptions.map((subscription) => ({
                 ) : (
                   <ul class="divide-border mt-3 divide-y">
                     {totals.map((total) => (
-                      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
-                        <span class="text-muted-foreground font-mono text-sm">{total.currency}</span>
+                      <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5">
+                        <span class="bg-accent text-link rounded-md px-2 py-0.5 font-mono text-xs font-bold">
+                          {total.currency}
+                        </span>
                         <span class="text-right">
-                          <span class="text-lg font-semibold tabular-nums">
+                          <span class="text-brand-gradient text-xl font-bold tabular-nums">
                             {formatMoney(total.monthly, total.currency)}
                           </span>
                           <span class="text-muted-foreground text-sm">{t("dash.perMonth")}</span>
@@ -141,20 +150,31 @@ const rows = subscriptions.map((subscription) => ({
                   <ul class="divide-border mt-3 divide-y">
                     {categoryGroups.map(({ category, totals: categoryRows }) => (
                       <li class="py-2">
-                        <p class="font-semibold">{category}</p>
+                        <p class="font-semibold">{categoryLabel(lang, category)}</p>
                         <ul class="mt-1 space-y-1">
                           {categoryRows.map((total) => (
-                            <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                              <span class="text-muted-foreground font-mono text-sm">{total.currency}</span>
-                              <span class="text-right">
-                                <span class="font-semibold tabular-nums">
-                                  {formatMoney(total.monthly, total.currency)}
+                            <li>
+                              <span class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                <span class="text-muted-foreground font-mono text-sm">{total.currency}</span>
+                                <span class="text-right">
+                                  <span class="font-semibold tabular-nums">
+                                    {formatMoney(total.monthly, total.currency)}
+                                  </span>
+                                  <span class="text-muted-foreground text-sm">{t("dash.perMonth")}</span>
+                                  <span class="ml-3 text-sm font-medium tabular-nums">
+                                    {formatMoney(total.yearly, total.currency)}
+                                  </span>
+                                  <span class="text-muted-foreground text-sm">{t("dash.perYear")}</span>
                                 </span>
-                                <span class="text-muted-foreground text-sm">{t("dash.perMonth")}</span>
-                                <span class="ml-3 text-sm font-medium tabular-nums">
-                                  {formatMoney(total.yearly, total.currency)}
-                                </span>
-                                <span class="text-muted-foreground text-sm">{t("dash.perYear")}</span>
+                              </span>
+                              <span
+                                class="bg-secondary mt-1.5 block h-1.5 overflow-hidden rounded-full"
+                                aria-hidden="true"
+                              >
+                                <span
+                                  class="bg-brand-gradient block h-full rounded-full"
+                                  style={`width: ${String(shareOf(total.currency, total.monthly))}%`}
+                                />
                               </span>
                             </li>
                           ))}
@@ -179,9 +199,11 @@ const rows = subscriptions.map((subscription) => ({
                   <ul class="divide-border mt-3 divide-y">
                     {upcoming.map(({ subscription, renewalDate }) => (
                       <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
-                        <span>
+                        <span class="flex flex-wrap items-center gap-3">
                           <span class="font-semibold">{subscription.name}</span>
-                          <span class="text-muted-foreground ml-3 font-mono text-sm">{renewalDate}</span>
+                          <span class="bg-secondary text-muted-foreground rounded-md px-2 py-0.5 font-mono text-xs font-semibold">
+                            {renewalDate}
+                          </span>
                         </span>
                         <span class="text-sm font-medium tabular-nums">
                           {formatMoney(subscription.amount, subscription.currency)}
@@ -198,7 +220,7 @@ const rows = subscriptions.map((subscription) => ({
                 </h2>
                 <ul class="space-y-3">
                   {rows.map(({ subscription, normalized, renewal }) => (
-                    <li class="border-border bg-card rounded-2xl border p-4 shadow-sm sm:p-5">
+                    <li class="border-border bg-card card-lift rounded-2xl border p-4 shadow-sm sm:p-5">
                       <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="font-semibold">{subscription.name}</p>
                         <StatusBadge status={subscription.status} />

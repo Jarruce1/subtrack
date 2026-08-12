@@ -35,6 +35,10 @@
   --input: #b9c4cd;
   --ring: #0f9b8f;
   --link: #0c6e66;
+  --grad-a: #0f766e;
+  --grad-b: #1d4ed8;
+  --dot: #d3dde4;
+  --accent-soft-border: #9ed6cf;
   --success-soft: #e6f4f2;
   --success-text: #0b5d56;
   --success-border: #9ed6cf;
@@ -81,6 +85,10 @@
   --input: #435363;
   --ring: #3ddcc7;
   --link: #4fd8c6;
+  --grad-a: #2dd4bf;
+  --grad-b: #60a5fa;
+  --dot: #223040;
+  --accent-soft-border: #1e6b62;
   --success-soft: #10302c;
   --success-text: #6fdccb;
   --success-border: #1e6b62;
@@ -156,6 +164,36 @@
 /* Soft teal wash behind the landing hero; theme-aware. */
 @utility bg-hero-wash {
   background-image: radial-gradient(60% 50% at 50% 0%, var(--accent) 0%, transparent 70%);
+}
+
+/* Brand gradient — headings' highlight and primary stat surfaces. */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(120deg, var(--grad-a) 0%, var(--grad-b) 100%);
+}
+@utility text-brand-gradient {
+  background-image: linear-gradient(105deg, var(--grad-a) 20%, var(--grad-b) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Subtle dot texture layered under the hero wash. */
+@utility bg-dot-grid {
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Interactive card: lifts on hover, calm at rest. */
+@utility card-lift {
+  transition:
+    box-shadow 160ms,
+    transform 160ms,
+    border-color 160ms;
+}
+.card-lift:hover {
+  box-shadow: 0 6px 24px rgb(15 118 110 / 0.14);
+  transform: translateY(-1px);
+  border-color: var(--accent-soft-border, var(--ring));
 }
 
 @layer base {

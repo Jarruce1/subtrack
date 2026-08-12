@@ -6,149 +6,253 @@ const { user } = Astro.locals;
 const lang = getLang(Astro.cookies);
 const t = translator(lang);
 
-const featureIcon = "mb-3 text-link";
+const chip = "bg-accent text-link mb-4 inline-flex size-11 items-center justify-center rounded-xl";
 ---
 
 <Topbar />
 
-<main id="main" class="bg-hero-wash">
-  <div class="mx-auto flex max-w-4xl flex-col items-center px-4 pt-16 pb-14 text-center sm:pt-24">
-    <p
-      class="text-link border-success-border bg-accent mb-6 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-widest uppercase"
-    >
-      {t("land.badge")}
-    </p>
-    <h1 class="max-w-[18ch] text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl">
-      {t("land.title.pre")}
-      <span class="text-link">{t("land.title.highlight")}</span>
-    </h1>
-    <p class="text-muted-foreground mt-5 max-w-2xl text-lg sm:text-xl">
-      {t("land.lead")}
-    </p>
-    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-      {
-        user ? (
-          <a
-            href="/dashboard"
-            class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-11 items-center justify-center rounded-lg px-6 py-2.5 text-base font-semibold transition-colors"
-          >
-            {t("land.cta.dashboard")}
-          </a>
-        ) : (
-          <>
-            <a
-              href="/auth/signup"
-              class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-11 items-center justify-center rounded-lg px-6 py-2.5 text-base font-semibold transition-colors"
-            >
-              {t("land.cta.start")}
-            </a>
-            <a
-              href="/auth/signin"
-              class="border-input bg-card hover:bg-accent hover:border-ring inline-flex min-h-11 items-center justify-center rounded-lg border px-6 py-2.5 text-base font-semibold transition-colors"
-            >
-              {t("land.cta.signin")}
-            </a>
-          </>
-        )
-      }
-    </div>
+<main id="main">
+  <div class="bg-dot-grid relative overflow-hidden">
+    <div class="bg-hero-wash pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
-    <div
-      class="border-border bg-card mt-14 flex flex-wrap justify-center gap-x-9 gap-y-5 rounded-2xl border px-7 py-5 shadow-sm"
-      aria-label={t("land.summary.aria")}
-    >
-      <div class="flex flex-col text-left">
-        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-          {t("land.summary.monthly")}
-        </span>
-        <span class="text-2xl font-bold tabular-nums">PLN 187.46</span>
-        <span class="text-muted-foreground text-sm">{t("land.summary.monthly.sub")}</span>
+    <div class="relative mx-auto flex max-w-4xl flex-col items-center px-4 pt-16 pb-16 text-center sm:pt-24">
+      <p
+        class="text-link border-success-border bg-accent mb-6 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-widest uppercase"
+      >
+        {t("land.badge")}
+      </p>
+      <h1 class="max-w-[18ch] text-4xl leading-tight font-bold tracking-tight sm:text-6xl">
+        {t("land.title.pre")}
+        <span class="text-brand-gradient">{t("land.title.highlight")}</span>
+      </h1>
+      <p class="text-muted-foreground mt-6 max-w-2xl text-lg sm:text-xl">
+        {t("land.lead")}
+      </p>
+      <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+        {
+          user ? (
+            <a
+              href="/dashboard"
+              class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-12 items-center justify-center rounded-xl px-7 py-3 text-base font-semibold shadow-lg shadow-teal-900/10 transition-colors"
+            >
+              {t("land.cta.dashboard")}
+            </a>
+          ) : (
+            <>
+              <a
+                href="/auth/signup"
+                class="bg-primary text-primary-foreground hover:bg-primary-hover inline-flex min-h-12 items-center justify-center rounded-xl px-7 py-3 text-base font-semibold shadow-lg shadow-teal-900/10 transition-colors"
+              >
+                {t("land.cta.start")}
+              </a>
+              <a
+                href="/auth/signin"
+                class="border-input bg-card hover:bg-accent hover:border-ring inline-flex min-h-12 items-center justify-center rounded-xl border px-7 py-3 text-base font-semibold transition-colors"
+              >
+                {t("land.cta.signin")}
+              </a>
+            </>
+          )
+        }
       </div>
-      <div class="flex flex-col text-left">
-        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-          {t("land.summary.yearly")}
-        </span>
-        <span class="text-2xl font-bold tabular-nums">PLN 2,249.52</span>
-        <span class="text-muted-foreground text-sm">{t("land.summary.yearly.sub")}</span>
-      </div>
-      <div class="flex flex-col text-left">
-        <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-          {t("land.summary.next")}
-        </span>
-        <span class="text-2xl font-bold tabular-nums">{t("land.summary.next.value")}</span>
-        <span class="text-muted-foreground text-sm">{t("land.summary.next.sub")}</span>
+
+      <!-- Product preview: a miniature of the real dashboard -->
+      <div
+        class="border-border bg-card mt-16 w-full max-w-2xl rounded-2xl border p-5 text-left shadow-xl shadow-teal-900/10 sm:p-6"
+        aria-label={t("land.summary.aria")}
+      >
+        <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+          <div class="flex flex-col">
+            <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              {t("land.summary.monthly")}
+            </span>
+            <span class="text-brand-gradient text-3xl font-bold tabular-nums">PLN 187.46</span>
+            <span class="text-muted-foreground text-sm">{t("land.summary.monthly.sub")}</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              {t("land.summary.yearly")}
+            </span>
+            <span class="text-2xl font-bold tabular-nums">PLN 2,249.52</span>
+            <span class="text-muted-foreground text-sm">{t("land.summary.yearly.sub")}</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              {t("land.summary.next")}
+            </span>
+            <span class="text-2xl font-bold tabular-nums">{t("land.summary.next.value")}</span>
+            <span class="text-muted-foreground text-sm">{t("land.summary.next.sub")}</span>
+          </div>
+        </div>
+        <div class="border-border mt-5 space-y-3 border-t pt-4" aria-hidden="true">
+          <div class="flex items-center gap-3">
+            <span
+              class="bg-accent text-link inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+            >
+              N
+            </span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="truncate text-sm font-semibold">Netflix</span>
+                <span class="text-sm font-semibold tabular-nums">PLN 43.00</span>
+              </div>
+              <div class="bg-secondary mt-1.5 h-1.5 overflow-hidden rounded-full">
+                <div class="bg-brand-gradient h-full w-[23%] rounded-full"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span
+              class="bg-accent text-link inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+            >
+              S
+            </span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="truncate text-sm font-semibold">Spotify Duo</span>
+                <span class="text-sm font-semibold tabular-nums">PLN 28.99</span>
+              </div>
+              <div class="bg-secondary mt-1.5 h-1.5 overflow-hidden rounded-full">
+                <div class="bg-brand-gradient h-full w-[15%] rounded-full"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span
+              class="bg-accent text-link inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+            >
+              G
+            </span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline justify-between gap-3">
+                <span class="truncate text-sm font-semibold">Gym — CityFit</span>
+                <span class="text-sm font-semibold tabular-nums">PLN 129.00</span>
+              </div>
+              <div class="bg-secondary mt-1.5 h-1.5 overflow-hidden rounded-full">
+                <div class="bg-brand-gradient h-full w-[69%] rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="mx-auto grid max-w-4xl grid-cols-1 gap-4 px-4 pb-20 sm:grid-cols-3">
-    <div class="border-border bg-card rounded-2xl border p-6 shadow-sm">
-      <svg
-        aria-hidden="true"
-        width="26"
-        height="26"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class:list={featureIcon}
-      >
-        <line x1="12" y1="2" x2="12" y2="22"></line>
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-      </svg>
+  <div class="mx-auto grid max-w-4xl grid-cols-1 gap-5 px-4 pt-16 sm:grid-cols-3">
+    <div class="border-border bg-card card-lift rounded-2xl border p-6 shadow-sm">
+      <span class:list={chip}>
+        <svg
+          aria-hidden="true"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="12" y1="2" x2="12" y2="22"></line>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+      </span>
       <h2 class="mb-2 text-lg font-semibold">{t("land.f1.title")}</h2>
       <p class="text-muted-foreground text-sm leading-relaxed">
         {t("land.f1.body")}
       </p>
     </div>
 
-    <div class="border-border bg-card rounded-2xl border p-6 shadow-sm">
-      <svg
-        aria-hidden="true"
-        width="26"
-        height="26"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class:list={featureIcon}
-      >
-        <path d="M8 2v4"></path>
-        <path d="M16 2v4"></path>
-        <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-        <path d="M3 10h18"></path>
-        <path d="m9 16 2 2 4-4"></path>
-      </svg>
+    <div class="border-border bg-card card-lift rounded-2xl border p-6 shadow-sm">
+      <span class:list={chip}>
+        <svg
+          aria-hidden="true"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M8 2v4"></path>
+          <path d="M16 2v4"></path>
+          <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+          <path d="M3 10h18"></path>
+          <path d="m9 16 2 2 4-4"></path>
+        </svg>
+      </span>
       <h2 class="mb-2 text-lg font-semibold">{t("land.f2.title")}</h2>
       <p class="text-muted-foreground text-sm leading-relaxed">
         {t("land.f2.body")}
       </p>
     </div>
 
-    <div class="border-border bg-card rounded-2xl border p-6 shadow-sm">
-      <svg
-        aria-hidden="true"
-        width="26"
-        height="26"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class:list={featureIcon}
-      >
-        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
+    <div class="border-border bg-card card-lift rounded-2xl border p-6 shadow-sm">
+      <span class:list={chip}>
+        <svg
+          aria-hidden="true"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </span>
       <h2 class="mb-2 text-lg font-semibold">{t("land.f3.title")}</h2>
       <p class="text-muted-foreground text-sm leading-relaxed">
         {t("land.f3.body")}
       </p>
     </div>
   </div>
+
+  <section class="mx-auto max-w-4xl px-4 pt-20 pb-20" aria-labelledby="how-heading">
+    <h2 id="how-heading" class="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+      {t("land.how.title")}
+    </h2>
+    <ol class="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
+      <li class="flex flex-col items-center text-center">
+        <span
+          class="bg-brand-gradient dark:text-background mb-4 inline-flex size-10 items-center justify-center rounded-full text-base font-bold text-white"
+        >
+          1
+        </span>
+        <h3 class="text-base font-semibold">{t("land.how.s1.title")}</h3>
+        <p class="text-muted-foreground mt-1.5 max-w-xs text-sm leading-relaxed">{t("land.how.s1.body")}</p>
+      </li>
+      <li class="flex flex-col items-center text-center">
+        <span
+          class="bg-brand-gradient dark:text-background mb-4 inline-flex size-10 items-center justify-center rounded-full text-base font-bold text-white"
+        >
+          2
+        </span>
+        <h3 class="text-base font-semibold">{t("land.how.s2.title")}</h3>
+        <p class="text-muted-foreground mt-1.5 max-w-xs text-sm leading-relaxed">{t("land.how.s2.body")}</p>
+      </li>
+      <li class="flex flex-col items-center text-center">
+        <span
+          class="bg-brand-gradient dark:text-background mb-4 inline-flex size-10 items-center justify-center rounded-full text-base font-bold text-white"
+        >
+          3
+        </span>
+        <h3 class="text-base font-semibold">{t("land.how.s3.title")}</h3>
+        <p class="text-muted-foreground mt-1.5 max-w-xs text-sm leading-relaxed">{t("land.how.s3.body")}</p>
+      </li>
+    </ol>
+  </section>
+
+  <footer class="border-border border-t px-4 py-8">
+    <div class="text-muted-foreground mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 text-sm">
+      <span class="text-foreground font-bold tracking-tight">
+        Sub<span class="text-link">Track</span>
+      </span>
+      <span>{t("land.footer.note")}</span>
+    </div>
+  </footer>
 </main>

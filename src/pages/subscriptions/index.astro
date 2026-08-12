@@ -62,7 +62,7 @@ const rows = subscriptions.map((subscription) => ({
           ) : (
             <ul class="space-y-3">
               {rows.map(({ subscription, normalized }) => (
-                <li class="border-border bg-card rounded-2xl border p-4 shadow-sm sm:p-5">
+                <li class="border-border bg-card card-lift rounded-2xl border p-4 shadow-sm sm:p-5">
                   <div class="flex flex-wrap items-center justify-between gap-2">
                     <p class="font-semibold">{subscription.name}</p>
                     <StatusBadge status={subscription.status} />

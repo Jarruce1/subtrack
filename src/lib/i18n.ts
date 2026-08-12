@@ -54,6 +54,14 @@ const en = {
     "Exact next-renewal dates — month-end and leap-year cases included — plus a 30-day upcoming list so you can cancel before you're charged.",
   "land.f3.title": "Private by design",
   "land.f3.body": "Your account, your data — enforced at the database level. Nobody else ever sees what you pay for.",
+  "land.how.title": "How it works",
+  "land.how.s1.title": "Add your subscriptions",
+  "land.how.s1.body": "Name, price, billing cycle, start date — thirty seconds per entry, any currency.",
+  "land.how.s2.title": "See the true cost",
+  "land.how.s2.body": "Mixed cycles collapse into one honest monthly and yearly total, per currency and per category.",
+  "land.how.s3.title": "Cancel in time",
+  "land.how.s3.body": "The 30-day renewal list shows exactly what charges next — cancel before the money leaves.",
+  "land.footer.note": "Built with Astro, Supabase and Cloudflare Workers.",
 
   // dashboard
   "dash.title": "Dashboard",
@@ -213,6 +221,15 @@ const pl: Record<MessageKey, string> = {
   "land.f3.title": "Prywatność w standardzie",
   "land.f3.body":
     "Twoje konto, Twoje dane — wymuszone na poziomie bazy danych. Nikt inny nigdy nie zobaczy, za co płacisz.",
+  "land.how.title": "Jak to działa",
+  "land.how.s1.title": "Dodaj swoje subskrypcje",
+  "land.how.s1.body": "Nazwa, cena, cykl rozliczeń, data startu — trzydzieści sekund na wpis, dowolna waluta.",
+  "land.how.s2.title": "Zobacz prawdziwy koszt",
+  "land.how.s2.body":
+    "Mieszane cykle zwijają się do jednej uczciwej sumy miesięcznej i rocznej — per waluta i kategoria.",
+  "land.how.s3.title": "Anuluj na czas",
+  "land.how.s3.body": "Lista odnowień na 30 dni pokazuje, co obciąży Cię następne — anuluj zanim pieniądze wyjdą.",
+  "land.footer.note": "Zbudowane na Astro, Supabase i Cloudflare Workers.",
 
   "dash.title": "Pulpit",
   "dash.add": "Dodaj subskrypcję",
