@@ -3,22 +3,17 @@ import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import { getLang, translator } from "@/lib/i18n";
 
-const isAutoConfirmed = import.meta.env.DEV;
 const t = translator(getLang(Astro.cookies));
 
-const content = isAutoConfirmed
-  ? {
-      emoji: "✅",
-      heading: t("auth.confirmed.title"),
-      description: t("auth.confirmed.body"),
-      linkText: t("auth.confirmed.link"),
-    }
-  : {
-      emoji: "📧",
-      heading: t("auth.checkEmail.title"),
-      description: t("auth.checkEmail.body"),
-      linkText: t("auth.checkEmail.link"),
-    };
+// Email confirmations are disabled project-wide (supabase config: accounts
+// auto-confirm on signup), so this page always reports plain success — the
+// "check your email" variant died with the confirmation mails.
+const content = {
+  emoji: "✅",
+  heading: t("auth.confirmed.title"),
+  description: t("auth.confirmed.body"),
+  linkText: t("auth.confirmed.link"),
+};
 ---
 
 <Layout title={`${content.heading} — SubTrack`}>

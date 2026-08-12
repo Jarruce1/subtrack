@@ -11,7 +11,15 @@ export const POST: APIRoute = async (context) => {
   if (!supabase) {
     return context.redirect("/auth/signup?error=not-configured");
   }
-  const { error } = await supabase.auth.signUp({ email, password });
+  // The confirmation-mail link must come back to THIS deployment, not the
+  // Supabase project's static Site URL (which pointed at localhost and sent
+  // prod users to a dead address). The origin must be on the project's
+  // redirect allow-list (supabase/config.toml → additional_redirect_urls).
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: new URL("/auth/signin", context.url.origin).toString() },
+  });
 
   if (error) {
     // Short code only — backend error detail never belongs in a URL
