@@ -31,6 +31,10 @@
 | 22 | A11y: skip-link, focus ring, aria-invalid | — | — | — | ✅‡ | ✅ | — |
 | 23 | RWD: mobile 375px bez poziomego scrolla | — | — | — | — | ✅ | — |
 | 24 | Empty states (dashboard, lista) | — | — | — | ✅ | ✅ | — |
+| 25 | Lista: szukajka/filtr statusu/sortowanie (SSR, query params) | — | — | — | ✅ | — | — |
+| 26 | Eksport CSV (auth, nagłówki, zawartość) | #2 | — | — | ✅ | — | — |
+| 27 | Karta „wstrzymane oszczędności" (summarizePaused) | #1 | ✅ | — | ✅ | — | — |
+| 28 | Chipy pilności odnowień (daysUntil) | #1 | ✅ | — | — | ✅ | — |
 
 \* scan `dist/client` w CI (`scan:secrets:dist`) + break-gate.
 † `auth.setup.ts` przechodzi realny signup przez UI.

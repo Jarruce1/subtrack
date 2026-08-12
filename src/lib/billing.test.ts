@@ -3,7 +3,15 @@
 // cites its source so a failure reads as a spec violation. The generated-input
 // safety net lives in billing.properties.test.ts.
 import { describe, expect, it } from "vitest";
-import { nextRenewalDate, normalizeCost, summarizeActive, summarizeByCategory, upcomingRenewals } from "@/lib/billing";
+import {
+  daysUntil,
+  nextRenewalDate,
+  normalizeCost,
+  summarizeActive,
+  summarizeByCategory,
+  summarizePaused,
+  upcomingRenewals,
+} from "@/lib/billing";
 import type { Subscription } from "@/types";
 
 let fixtureCount = 0;
@@ -404,5 +412,41 @@ describe("upcomingRenewals (Business Logic §4 / FR-013)", () => {
   it("invalid today throws even with an empty list (validate-first, like nextRenewalDate)", () => {
     expect(() => upcomingRenewals([], "2026-02-30")).toThrow(/invalid/);
     expect(() => upcomingRenewals([], "")).toThrow(/invalid/);
+  });
+});
+
+// --- S-08 additions: paused savings + day distance ---
+// Oracles hand-derived from PRD Business Logic §1 (normalization) applied to
+// paused rows only; never read from the implementation.
+
+describe("summarizePaused", () => {
+  it("sums only paused rows, per currency, with §1 normalization (43 PLN monthly paused → 43/mo, 516/yr)", () => {
+    const rows = [
+      sub({ status: "paused", amount: 43, billing_cycle: "monthly", currency: "PLN" }),
+      sub({ status: "active", amount: 99, billing_cycle: "monthly", currency: "PLN" }),
+      sub({ status: "cancelled", amount: 10, billing_cycle: "monthly", currency: "PLN" }),
+      // 120 EUR yearly paused → 10/mo hand-derived (120 / 12)
+      sub({ status: "paused", amount: 120, billing_cycle: "yearly", currency: "EUR" }),
+    ];
+    expect(summarizePaused(rows)).toEqual([
+      { currency: "EUR", monthly: 10, yearly: 120 },
+      { currency: "PLN", monthly: 43, yearly: 516 },
+    ]);
+  });
+
+  it("returns an empty list when nothing is paused", () => {
+    expect(summarizePaused([sub({ status: "active" })])).toEqual([]);
+  });
+});
+
+describe("daysUntil", () => {
+  it("same day is zero", () => {
+    expect(daysUntil("2026-08-12", "2026-08-12")).toBe(0);
+  });
+  it("counts across a month boundary (2026-08-30 → 2026-09-02 = 3)", () => {
+    expect(daysUntil("2026-08-30", "2026-09-02")).toBe(3);
+  });
+  it("counts across the 2028 leap day (2028-02-28 → 2028-03-01 = 2)", () => {
+    expect(daysUntil("2028-02-28", "2028-03-01")).toBe(2);
   });
 });

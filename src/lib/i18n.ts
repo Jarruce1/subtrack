@@ -82,6 +82,8 @@ const en = {
   "dash.monthly": "Monthly",
   "dash.yearly": "Yearly",
   "dash.nextRenewal": "Next renewal",
+  "dash.savings": "Paused savings",
+  "dash.savings.hint": "monthly cost of subscriptions you have paused",
   noSupabase: "Supabase is not configured.",
 
   // subscriptions list
@@ -89,6 +91,17 @@ const en = {
   "subs.empty.title": "No subscriptions yet",
   "subs.empty.body": "Once you add subscriptions, this is where you manage them — edit any field or delete an entry.",
   "subs.edit": "Edit",
+  "subs.filter.legend": "Filter and sort",
+  "subs.filter.search": "Search",
+  "subs.filter.search.placeholder": "Search by name…",
+  "subs.filter.status": "Status",
+  "subs.filter.all": "All statuses",
+  "subs.filter.sort": "Sort by",
+  "subs.sort.name": "Name",
+  "subs.sort.monthly": "Monthly cost",
+  "subs.filter.apply": "Apply",
+  "subs.filter.none": "No subscriptions match these filters.",
+  "subs.export": "Export CSV",
 
   // subscription form pages
   "form.add.title": "Add subscription",
@@ -249,12 +262,25 @@ const pl: Record<MessageKey, string> = {
   "dash.monthly": "Miesięcznie",
   "dash.yearly": "Rocznie",
   "dash.nextRenewal": "Następne odnowienie",
+  "dash.savings": "Wstrzymane oszczędności",
+  "dash.savings.hint": "miesięczny koszt subskrypcji, które wstrzymano",
   noSupabase: "Supabase nie jest skonfigurowane.",
 
   "subs.title": "Subskrypcje",
   "subs.empty.title": "Brak subskrypcji",
   "subs.empty.body": "Gdy dodasz subskrypcje, tutaj będziesz nimi zarządzać — edytować dowolne pole lub usuwać wpisy.",
   "subs.edit": "Edytuj",
+  "subs.filter.legend": "Filtruj i sortuj",
+  "subs.filter.search": "Szukaj",
+  "subs.filter.search.placeholder": "Szukaj po nazwie…",
+  "subs.filter.status": "Status",
+  "subs.filter.all": "Wszystkie statusy",
+  "subs.filter.sort": "Sortuj wg",
+  "subs.sort.name": "Nazwa",
+  "subs.sort.monthly": "Koszt miesięczny",
+  "subs.filter.apply": "Zastosuj",
+  "subs.filter.none": "Żadna subskrypcja nie pasuje do filtrów.",
+  "subs.export": "Eksport CSV",
 
   "form.add.title": "Dodaj subskrypcję",
   "form.edit.title": "Edytuj subskrypcję",
@@ -384,4 +410,16 @@ export function cyclephrase(lang: Lang, cycle: BillingCycle, intervalMonths: num
     case "custom":
       return `every ${n} months`;
   }
+}
+
+/** "today" / "tomorrow" / "in N days" chip label for upcoming renewals. */
+export function renewalCountdown(lang: Lang, days: number): string {
+  if (lang === "pl") {
+    if (days <= 0) return "dzisiaj";
+    if (days === 1) return "jutro";
+    return `za ${String(days)} dni`;
+  }
+  if (days <= 0) return "today";
+  if (days === 1) return "tomorrow";
+  return `in ${String(days)} days`;
 }

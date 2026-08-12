@@ -2,20 +2,22 @@
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import StatusBadge from "@/components/StatusBadge.astro";
+import CategoryAvatar from "@/components/CategoryAvatar.astro";
 import DeleteSubscriptionButton from "@/components/subscriptions/DeleteSubscriptionButton";
 import StatusActions from "@/components/subscriptions/StatusActions";
 import { createClient } from "@/lib/supabase";
 import { listSubscriptions } from "@/lib/services/subscriptions";
 import { normalizeCost } from "@/lib/billing";
 import { formatMoney } from "@/lib/format";
-import { categoryLabel, cyclephrase, getLang, translator } from "@/lib/i18n";
-import type { Subscription } from "@/types";
+import { SUBSCRIPTION_STATUSES } from "@/lib/validation/subscriptions";
+import { categoryLabel, cyclephrase, getLang, statusLabel, translator } from "@/lib/i18n";
+import type { Subscription, SubscriptionStatus } from "@/types";
 
 // FR-005: every subscription (any status) with status visible and costs
-// normalized — the management hub. Renewal dates and totals stay on the
-// dashboard (S-05 owns the renewal surface). SSR over live data, same
-// recompute-per-render freshness model as the dashboard; auth enforced by
-// middleware (PROTECTED_ROUTES prefix "/subscriptions").
+// normalized — the management hub. SSR over live data; auth enforced by
+// middleware (PROTECTED_ROUTES prefix "/subscriptions"). Filtering/sorting is
+// server-side via GET params (q, status, sort) so it works without JS and
+// every state is a shareable URL.
 
 const lang = getLang(Astro.cookies);
 const t = translator(lang);
@@ -24,10 +26,29 @@ const supabase = createClient(Astro.request.headers, Astro.cookies);
 // Type-level guard only — unreachable behind the middleware gate.
 const subscriptions: Subscription[] = supabase ? await listSubscriptions(supabase) : [];
 
-const rows = subscriptions.map((subscription) => ({
-  subscription,
-  normalized: normalizeCost(subscription.amount, subscription.billing_cycle, subscription.billing_interval_months),
-}));
+const query = (Astro.url.searchParams.get("q") ?? "").trim();
+const statusParam = Astro.url.searchParams.get("status") ?? "";
+const statusFilter: SubscriptionStatus | null = (SUBSCRIPTION_STATUSES as readonly string[]).includes(statusParam)
+  ? (statusParam as SubscriptionStatus)
+  : null;
+const sort = Astro.url.searchParams.get("sort") === "monthly" ? "monthly" : "name";
+
+const rows = subscriptions
+  .filter((subscription) => !statusFilter || subscription.status === statusFilter)
+  .filter((subscription) => !query || subscription.name.toLowerCase().includes(query.toLowerCase()))
+  .map((subscription) => ({
+    subscription,
+    normalized: normalizeCost(subscription.amount, subscription.billing_cycle, subscription.billing_interval_months),
+  }))
+  .sort((a, b) =>
+    sort === "monthly"
+      ? b.normalized.monthly - a.normalized.monthly || a.subscription.name.localeCompare(b.subscription.name)
+      : a.subscription.name.localeCompare(b.subscription.name),
+  );
+
+const filtersActive = query !== "" || statusFilter !== null;
+const inputClass =
+  "border-input bg-card min-h-10 rounded-lg border px-3 py-1.5 text-sm focus-visible:border-ring w-full";
 ---
 
 <Layout title={`${t("subs.title")} — SubTrack`}>
@@ -40,15 +61,78 @@ const rows = subscriptions.map((subscription) => ({
         <div class="mx-auto w-full max-w-3xl space-y-6 pt-7">
           <header class="flex flex-wrap items-center justify-between gap-3">
             <h1 class="text-3xl font-bold tracking-tight">{t("subs.title")}</h1>
-            <a
-              href="/subscriptions/new"
-              class="bg-primary text-primary-foreground hover:bg-primary-hover rounded-full px-4 py-2 text-sm font-semibold transition-colors"
-            >
-              {t("dash.add")}
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+              <a
+                href="/api/subscriptions/export"
+                class="border-input hover:border-foreground hover:bg-card rounded-full border px-4 py-2 text-sm font-medium transition-colors"
+              >
+                {t("subs.export")}
+              </a>
+              <a
+                href="/subscriptions/new"
+                class="bg-primary text-primary-foreground hover:bg-primary-hover rounded-full px-4 py-2 text-sm font-semibold transition-colors"
+              >
+                {t("dash.add")}
+              </a>
+            </div>
           </header>
 
-          {rows.length === 0 ? (
+          {subscriptions.length > 0 && (
+            <form
+              method="GET"
+              role="search"
+              aria-label={t("subs.filter.legend")}
+              class="border-border bg-card flex flex-wrap items-end gap-3 rounded-2xl border p-4 shadow-sm"
+            >
+              <div class="min-w-40 flex-1">
+                <label for="filter-q" class="mb-1 block text-xs font-semibold">
+                  {t("subs.filter.search")}
+                </label>
+                <input
+                  id="filter-q"
+                  name="q"
+                  type="search"
+                  value={query}
+                  placeholder={t("subs.filter.search.placeholder")}
+                  class:list={inputClass}
+                />
+              </div>
+              <div>
+                <label for="filter-status" class="mb-1 block text-xs font-semibold">
+                  {t("subs.filter.status")}
+                </label>
+                <select id="filter-status" name="status" class:list={inputClass}>
+                  <option value="">{t("subs.filter.all")}</option>
+                  {SUBSCRIPTION_STATUSES.map((status) => (
+                    <option value={status} selected={status === statusFilter}>
+                      {statusLabel(lang, status)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label for="filter-sort" class="mb-1 block text-xs font-semibold">
+                  {t("subs.filter.sort")}
+                </label>
+                <select id="filter-sort" name="sort" class:list={inputClass}>
+                  <option value="name" selected={sort === "name"}>
+                    {t("subs.sort.name")}
+                  </option>
+                  <option value="monthly" selected={sort === "monthly"}>
+                    {t("subs.sort.monthly")}
+                  </option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                class="bg-secondary text-foreground hover:bg-accent min-h-10 cursor-pointer rounded-full px-5 py-1.5 text-sm font-semibold transition-colors"
+              >
+                {t("subs.filter.apply")}
+              </button>
+            </form>
+          )}
+
+          {subscriptions.length === 0 ? (
             <section class="border-border bg-card rounded-2xl border p-8 text-center shadow-sm">
               <h2 class="text-xl font-semibold">{t("subs.empty.title")}</h2>
               <p class="text-muted-foreground mx-auto mt-2 max-w-md text-sm">{t("subs.empty.body")}</p>
@@ -59,19 +143,31 @@ const rows = subscriptions.map((subscription) => ({
                 {t("dash.empty.cta")}
               </a>
             </section>
+          ) : rows.length === 0 && filtersActive ? (
+            <p class="text-muted-foreground py-8 text-center text-sm">{t("subs.filter.none")}</p>
           ) : (
             <ul class="space-y-3">
               {rows.map(({ subscription, normalized }) => (
                 <li class="border-border bg-card card-lift rounded-2xl border p-4 shadow-sm sm:p-5">
-                  <div class="flex flex-wrap items-center justify-between gap-2">
-                    <p class="font-semibold">{subscription.name}</p>
-                    <StatusBadge status={subscription.status} />
+                  <div class="flex items-start gap-3.5">
+                    <CategoryAvatar name={subscription.name} category={subscription.category} />
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="font-semibold">{subscription.name}</p>
+                        <StatusBadge status={subscription.status} />
+                      </div>
+                      <p class="text-muted-foreground mt-0.5 text-sm">
+                        {categoryLabel(lang, subscription.category)} &middot;{" "}
+                        {formatMoney(subscription.amount, subscription.currency)}{" "}
+                        {cyclephrase(lang, subscription.billing_cycle, subscription.billing_interval_months)}
+                      </p>
+                      {subscription.note && (
+                        <p class="text-muted-foreground mt-1 truncate text-sm italic" title={subscription.note}>
+                          {subscription.note}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <p class="text-muted-foreground mt-1 text-sm">
-                    {categoryLabel(lang, subscription.category)} &middot;{" "}
-                    {formatMoney(subscription.amount, subscription.currency)}{" "}
-                    {cyclephrase(lang, subscription.billing_cycle, subscription.billing_interval_months)}
-                  </p>
                   <div class="mt-3 flex flex-wrap items-end justify-between gap-3">
                     <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
                       <div>

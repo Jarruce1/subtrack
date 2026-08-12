@@ -230,3 +230,25 @@ function occurrenceAtMonths(anchor: DateParts, totalMonths: number): DateParts {
   const month = (monthIndex % MONTHS_PER_YEAR) + 1;
   return { year, month, day: Math.min(anchor.day, daysInMonth(year, month)) };
 }
+
+/**
+ * Per-currency monthly/yearly totals of PAUSED subscriptions only — the
+ * "money you are currently not spending" view (dashboard savings card).
+ * Reuses the same normalization as summarizeActive so the two views can
+ * never disagree on arithmetic; cancelled rows are excluded (that money is
+ * gone, not paused). Sorted by currency.
+ */
+export function summarizePaused(subscriptions: Subscription[]): CurrencyTotal[] {
+  const paused = subscriptions.filter((subscription) => subscription.status === "paused");
+  // Delegate through summarizeActive by re-labelling: cheapest way to share
+  // the aggregation rule without widening its signature.
+  return summarizeActive(paused.map((subscription) => ({ ...subscription, status: "active" as const })));
+}
+
+/**
+ * Whole days from `from` to `to` (ISO dates; positive when `to` is later).
+ * Same-day → 0. Pure integer day arithmetic — no timezones involved.
+ */
+export function daysUntil(from: string, to: string): number {
+  return utcDayNumber(parseIsoDate(to)) - utcDayNumber(parseIsoDate(from));
+}

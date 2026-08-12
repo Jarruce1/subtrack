@@ -1,0 +1,32 @@
+---
+import type { SubscriptionCategory } from "@/types";
+
+interface Props {
+  name: string;
+  category: SubscriptionCategory;
+}
+
+const { name, category } = Astro.props;
+
+// Serif monogram tinted by category — concrete per-subscription mark without
+// third-party brand assets (trademark-free by construction).
+const tones: Record<SubscriptionCategory, string> = {
+  Streaming: "bg-accent text-link",
+  Software: "bg-success-soft text-success-text",
+  "Health & Fitness": "bg-warning-soft text-warning-text",
+  "News & Media": "bg-secondary text-foreground",
+  Other: "border-input text-muted-foreground border",
+};
+
+const initial = (name.trim().charAt(0) || "?").toUpperCase();
+---
+
+<span
+  aria-hidden="true"
+  class:list={[
+    "font-display inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold",
+    tones[category],
+  ]}
+>
+  {initial}
+</span>
