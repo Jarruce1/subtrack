@@ -8,6 +8,11 @@ import type { CreateSubscriptionInput, UpdateSubscriptionInput } from "@/types";
 //
 // This module must stay client-safe: the form island bundles it, so no
 // server-only imports — only zod plus type-only imports from @/types.
+//
+// Issue messages are i18n MessageKeys (see @/lib/i18n), not English text:
+// the form translates them at render time (`isMessageKey(m) ? t(m) : m`),
+// and API 400 bodies carry the same keys so server-rejected input reads the
+// same in both languages.
 
 export const BILLING_CYCLES = ["weekly", "monthly", "yearly", "custom"] as const;
 export const SUBSCRIPTION_CATEGORIES = ["Streaming", "Software", "Health & Fitness", "News & Media", "Other"] as const;
@@ -30,44 +35,40 @@ function isRealCalendarDate(value: string): boolean {
   return day <= monthLengths[month - 1];
 }
 
-const nameSchema = z
-  .string("Name is required")
-  .trim()
-  .min(1, "Name is required")
-  .max(120, "Name must be at most 120 characters");
+const nameSchema = z.string("v.nameRequired").trim().min(1, "v.nameRequired").max(120, "v.nameMax");
 
 const amountSchema = z
-  .number("Amount must be a number") // z.number() rejects NaN/Infinity by itself in zod v4
-  .positive("Amount must be greater than 0")
-  .lt(1e10, "Amount is too large")
-  .refine((value) => Math.round(value * 100) / 100 === value, "Amount can have at most 2 decimal places");
+  .number("v.amountNumber") // z.number() rejects NaN/Infinity by itself in zod v4
+  .positive("v.amountPositive")
+  .lt(1e10, "v.amountMax")
+  .refine((value) => Math.round(value * 100) / 100 === value, "v.amountDecimals");
 
 const currencySchema = z
-  .string("Currency is required")
+  .string("v.currencyRequired")
   .trim()
   .toUpperCase()
-  .regex(/^[A-Z]{3}$/, "Currency must be a 3-letter ISO code (e.g. PLN)");
+  .regex(/^[A-Z]{3}$/, "v.currencyFormat");
 
-const billingCycleSchema = z.enum(BILLING_CYCLES, "Pick a billing cycle");
+const billingCycleSchema = z.enum(BILLING_CYCLES, "f.cycle.placeholder");
 
 const billingIntervalSchema = z
-  .number("Interval must be a number of months")
-  .int("Interval must be a whole number of months")
-  .min(1, "Interval must be between 1 and 120 months")
-  .max(120, "Interval must be between 1 and 120 months");
+  .number("v.intervalNumber")
+  .int("v.intervalInt")
+  .min(1, "v.intervalRange")
+  .max(120, "v.intervalRange");
 
 const startDateSchema = z
-  .string("Start date is required")
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD")
-  .refine(isRealCalendarDate, "Start date must be a real calendar date");
+  .string("v.startRequired")
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "v.startFormat")
+  .refine(isRealCalendarDate, "v.startReal");
 
-const categorySchema = z.enum(SUBSCRIPTION_CATEGORIES, "Pick a category");
+const categorySchema = z.enum(SUBSCRIPTION_CATEGORIES, "f.category.placeholder");
 
-const statusSchema = z.enum(SUBSCRIPTION_STATUSES, "Pick a status");
+const statusSchema = z.enum(SUBSCRIPTION_STATUSES, "f.status.placeholder");
 
 const noteSchema = z
   .string()
-  .max(500, "Note must be at most 500 characters")
+  .max(500, "v.noteMax")
   .nullish()
   .transform((value) => {
     const trimmed = value?.trim();
@@ -96,7 +97,7 @@ export const subscriptionCreateSchema = z
         ctx.addIssue({
           code: "custom",
           path: ["billing_interval_months"],
-          message: "Interval in months is required for a custom cycle",
+          message: "v.intervalCustomRequired",
         });
         return z.NEVER;
       }
@@ -130,7 +131,7 @@ export const subscriptionUpdateSchema = z
   })
   .partial()
   .refine((data) => Object.keys(data).length > 0, {
-    message: "Provide at least one field to update",
+    message: "v.updateEmpty",
   })
   .superRefine((data, ctx) => {
     // The DB pair-CHECK must stay satisfiable without reading current state:
@@ -141,7 +142,7 @@ export const subscriptionUpdateSchema = z
       ctx.addIssue({
         code: "custom",
         path: [hasCycle ? "billing_interval_months" : "billing_cycle"],
-        message: "billing_cycle and billing_interval_months must be updated together",
+        message: "v.cyclePairTogether",
       });
       return;
     }
@@ -152,13 +153,13 @@ export const subscriptionUpdateSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["billing_interval_months"],
-        message: "Interval in months is required for a custom cycle",
+        message: "v.intervalCustomRequired",
       });
     } else if (data.billing_cycle !== "custom" && data.billing_interval_months !== null) {
       ctx.addIssue({
         code: "custom",
         path: ["billing_interval_months"],
-        message: "Interval in months applies only to a custom cycle",
+        message: "v.intervalOnlyCustom",
       });
     }
   });

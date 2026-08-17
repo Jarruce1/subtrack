@@ -2,13 +2,14 @@
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import SignInForm from "@/components/auth/SignInForm";
-import { authErrorMessage } from "@/lib/auth-errors";
+import { authErrorKey } from "@/lib/auth-errors";
 import { getLang, translator } from "@/lib/i18n";
 
-// ?error= carries a short code (see auth-errors.ts) — never free text.
-const error = authErrorMessage(Astro.url.searchParams.get("error"));
 const lang = getLang(Astro.cookies);
 const t = translator(lang);
+// ?error= carries a short code (see auth-errors.ts) — never free text.
+const errorKey = authErrorKey(Astro.url.searchParams.get("error"));
+const error = errorKey ? t(errorKey) : null;
 ---
 
 <Layout title={`${t("auth.signin.title")} — SubTrack`}>

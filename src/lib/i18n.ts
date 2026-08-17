@@ -193,6 +193,35 @@ const en = {
   "auth.checkEmail.title": "Check your email",
   "auth.checkEmail.body": "We've sent a confirmation link to your email address. Click it to activate your account.",
   "auth.checkEmail.link": "Back to sign in",
+
+  // auth ?error= codes (auth-errors.ts maps code → key)
+  "autherr.invalid-credentials": "Invalid email or password.",
+  "autherr.email-taken": "An account with this email already exists.",
+  "autherr.rate-limited": "Too many attempts. Please wait a moment and try again.",
+  "autherr.not-configured": "Supabase is not configured.",
+  "autherr.signout-failed": "Sign out failed. Please try again.",
+  "autherr.unknown": "Something went wrong. Please try again.",
+
+  // subscription validation (zod schema messages are these keys)
+  "v.nameRequired": "Name is required",
+  "v.nameMax": "Name must be at most 120 characters",
+  "v.amountNumber": "Amount must be a number",
+  "v.amountPositive": "Amount must be greater than 0",
+  "v.amountMax": "Amount is too large",
+  "v.amountDecimals": "Amount can have at most 2 decimal places",
+  "v.currencyRequired": "Currency is required",
+  "v.currencyFormat": "Currency must be a 3-letter ISO code (e.g. PLN)",
+  "v.intervalNumber": "Interval must be a number of months",
+  "v.intervalInt": "Interval must be a whole number of months",
+  "v.intervalRange": "Interval must be between 1 and 120 months",
+  "v.startRequired": "Start date is required",
+  "v.startFormat": "Start date must be YYYY-MM-DD",
+  "v.startReal": "Start date must be a real calendar date",
+  "v.noteMax": "Note must be at most 500 characters",
+  "v.intervalCustomRequired": "Interval in months is required for a custom cycle",
+  "v.updateEmpty": "Provide at least one field to update",
+  "v.cyclePairTogether": "billing_cycle and billing_interval_months must be updated together",
+  "v.intervalOnlyCustom": "Interval in months applies only to a custom cycle",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -367,6 +396,35 @@ const pl: Record<MessageKey, string> = {
   "auth.checkEmail.title": "Sprawdź pocztę",
   "auth.checkEmail.body": "Wysłaliśmy link potwierdzający na Twój adres e-mail. Kliknij go, aby aktywować konto.",
   "auth.checkEmail.link": "Wróć do logowania",
+
+  // auth ?error= codes
+  "autherr.invalid-credentials": "Nieprawidłowy e-mail lub hasło.",
+  "autherr.email-taken": "Konto z tym adresem e-mail już istnieje.",
+  "autherr.rate-limited": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.",
+  "autherr.not-configured": "Supabase nie jest skonfigurowane.",
+  "autherr.signout-failed": "Wylogowanie nie powiodło się. Spróbuj ponownie.",
+  "autherr.unknown": "Coś poszło nie tak. Spróbuj ponownie.",
+
+  // subscription validation
+  "v.nameRequired": "Nazwa jest wymagana",
+  "v.nameMax": "Nazwa może mieć najwyżej 120 znaków",
+  "v.amountNumber": "Kwota musi być liczbą",
+  "v.amountPositive": "Kwota musi być większa od 0",
+  "v.amountMax": "Kwota jest zbyt duża",
+  "v.amountDecimals": "Kwota może mieć najwyżej 2 miejsca po przecinku",
+  "v.currencyRequired": "Waluta jest wymagana",
+  "v.currencyFormat": "Waluta musi być 3-literowym kodem ISO (np. PLN)",
+  "v.intervalNumber": "Interwał musi być liczbą miesięcy",
+  "v.intervalInt": "Interwał musi być pełną liczbą miesięcy",
+  "v.intervalRange": "Interwał musi mieścić się w zakresie 1–120 miesięcy",
+  "v.startRequired": "Data startu jest wymagana",
+  "v.startFormat": "Data startu musi mieć format RRRR-MM-DD",
+  "v.startReal": "Data startu musi być prawdziwą datą kalendarzową",
+  "v.noteMax": "Notatka może mieć najwyżej 500 znaków",
+  "v.intervalCustomRequired": "Interwał w miesiącach jest wymagany dla cyklu niestandardowego",
+  "v.updateEmpty": "Podaj przynajmniej jedno pole do aktualizacji",
+  "v.cyclePairTogether": "Cykl i interwał muszą być aktualizowane razem",
+  "v.intervalOnlyCustom": "Interwał w miesiącach dotyczy tylko cyklu niestandardowego",
 };
 
 const messages: Record<Lang, Record<MessageKey, string>> = { en, pl };
@@ -374,6 +432,15 @@ const messages: Record<Lang, Record<MessageKey, string>> = { en, pl };
 /** Translator bound to a language: `const t = translator(lang); t("dash.title")`. */
 export function translator(lang: Lang) {
   return (key: MessageKey): string => messages[lang][key];
+}
+
+/**
+ * Guard for strings that may or may not be message keys (e.g. server error
+ * bodies whose fieldErrors carry the shared zod schema's `v.*` keys).
+ * Render with `isMessageKey(m) ? t(m) : m`.
+ */
+export function isMessageKey(value: string): value is MessageKey {
+  return Object.hasOwn(en, value);
 }
 
 export function statusLabel(lang: Lang, status: SubscriptionStatus): string {

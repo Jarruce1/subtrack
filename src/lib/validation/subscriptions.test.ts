@@ -16,15 +16,13 @@ function messages(input: unknown): string[] {
 
 describe("subscriptionUpdateSchema — empty-patch guard (F-01 review F2)", () => {
   it("rejects {} with the non-empty message", () => {
-    expect(messages({})).toContain("Provide at least one field to update");
+    expect(messages({})).toContain("v.updateEmpty");
   });
 
   it("rejects a payload of only unknown keys (zod strips them before the refine)", () => {
     // Load-bearing: without stripping-then-refining, {"id": …} would pass the
     // guard and PostgREST would still receive an empty patch.
-    expect(messages({ id: "00000000-0000-4000-8000-000000000001", user_id: "x" })).toContain(
-      "Provide at least one field to update",
-    );
+    expect(messages({ id: "00000000-0000-4000-8000-000000000001", user_id: "x" })).toContain("v.updateEmpty");
   });
 
   it("accepts a single-field patch", () => {
@@ -38,27 +36,19 @@ describe("subscriptionUpdateSchema — empty-patch guard (F-01 review F2)", () =
 
 describe("subscriptionUpdateSchema — cycle/interval pair rules", () => {
   it("rejects billing_cycle without billing_interval_months", () => {
-    expect(messages({ billing_cycle: "custom" })).toContain(
-      "billing_cycle and billing_interval_months must be updated together",
-    );
+    expect(messages({ billing_cycle: "custom" })).toContain("v.cyclePairTogether");
   });
 
   it("rejects billing_interval_months without billing_cycle", () => {
-    expect(messages({ billing_interval_months: 3 })).toContain(
-      "billing_cycle and billing_interval_months must be updated together",
-    );
+    expect(messages({ billing_interval_months: 3 })).toContain("v.cyclePairTogether");
   });
 
   it("rejects custom cycle with a null interval", () => {
-    expect(messages({ billing_cycle: "custom", billing_interval_months: null })).toContain(
-      "Interval in months is required for a custom cycle",
-    );
+    expect(messages({ billing_cycle: "custom", billing_interval_months: null })).toContain("v.intervalCustomRequired");
   });
 
   it("rejects a non-custom cycle with a numeric interval", () => {
-    expect(messages({ billing_cycle: "monthly", billing_interval_months: 3 })).toContain(
-      "Interval in months applies only to a custom cycle",
-    );
+    expect(messages({ billing_cycle: "monthly", billing_interval_months: 3 })).toContain("v.intervalOnlyCustom");
   });
 
   it("accepts custom cycle with a valid interval", () => {
@@ -91,7 +81,7 @@ describe("subscriptionUpdateSchema — full-field payload (the edit form's shape
   });
 
   it("still applies per-field rules on a partial patch", () => {
-    expect(messages({ amount: -1 })).toContain("Amount must be greater than 0");
-    expect(messages({ start_date: "2026-02-30" })).toContain("Start date must be a real calendar date");
+    expect(messages({ amount: -1 })).toContain("v.amountPositive");
+    expect(messages({ start_date: "2026-02-30" })).toContain("v.startReal");
   });
 });

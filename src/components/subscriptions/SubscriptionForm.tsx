@@ -13,7 +13,7 @@ import {
   SUBSCRIPTION_STATUSES,
   subscriptionCreateSchema,
 } from "@/lib/validation/subscriptions";
-import { categoryLabel, statusLabel, translator, type Lang } from "@/lib/i18n";
+import { categoryLabel, isMessageKey, statusLabel, translator, type Lang } from "@/lib/i18n";
 import type { Subscription } from "@/types";
 
 // FR-004/FR-006 subscription form, dual-mode (S-03 generalization of the S-01
@@ -184,8 +184,15 @@ export default function SubscriptionForm({ subscription, lang = "en" }: Subscrip
     }
   }
 
+  // Schema issues (client parse AND server 400 bodies) carry i18n keys;
+  // anything else (e.g. a raw server "error" string) passes through as-is.
+  function trMessage(message: string): string {
+    return isMessageKey(message) ? t(message) : message;
+  }
+
   function fieldError(field: string): string | undefined {
-    return fieldErrors[field]?.[0];
+    const message = fieldErrors[field]?.[0];
+    return message === undefined ? undefined : trMessage(message);
   }
 
   return (
@@ -380,7 +387,7 @@ export default function SubscriptionForm({ subscription, lang = "en" }: Subscrip
           className="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border px-3 py-2 text-sm"
         >
           {formErrors.map((message) => (
-            <p key={message}>{message}</p>
+            <p key={message}>{trMessage(message)}</p>
           ))}
         </div>
       )}

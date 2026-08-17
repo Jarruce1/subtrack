@@ -3,7 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import StatusBadge from "@/components/StatusBadge.astro";
 import CategoryAvatar from "@/components/CategoryAvatar.astro";
-import { authErrorMessage } from "@/lib/auth-errors";
+import { authErrorKey } from "@/lib/auth-errors";
 import { createClient } from "@/lib/supabase";
 import { listSubscriptions } from "@/lib/services/subscriptions";
 import {
@@ -39,7 +39,8 @@ const today = new Date().toISOString().slice(0, 10);
 // unknown codes collapse to the generic message, so a crafted link cannot put
 // chosen text inside this trusted page (content spoofing), and Astro's
 // default escaping keeps the value inert either way.
-const errorMessage = authErrorMessage(Astro.url.searchParams.get("error"));
+const errorKey = authErrorKey(Astro.url.searchParams.get("error"));
+const errorMessage = errorKey ? t(errorKey) : null;
 
 const totals = summarizeActive(subscriptions);
 const pausedTotals = summarizePaused(subscriptions);
